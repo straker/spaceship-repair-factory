@@ -1,4 +1,6 @@
-# js13k-2021
+# Spaceship Repair Factory
+
+An factory automation game about repairing spaceships in the Asteroid Belt.
 
 - `npm run build` - build source files into single HTML file
 - `npm run start` - start a local server on `http://localhost:8080/`

@@ -1,7 +1,7 @@
 {
-  "name": "js13k-2021",
+  "name": "spaceship-repair-factory",
   "version": "1.0.0",
-  "description": "",
+  "description": "An factory automation game about repairing spaceships in the Asteroid Belt.",
   "engines": {
     "node": ">= 16.0.0"
   },
