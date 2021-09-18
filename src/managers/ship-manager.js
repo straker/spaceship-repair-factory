@@ -1,4 +1,4 @@
-import { on, getContext, emit } from '../libs/kontra';
+import { on, getContext } from '../libs/kontra';
 import { TICK_DURATION, GRID_SIZE, COLORS } from '../constants';
 import Ship from '../buildings/ship';
 import { easeLinear, easeOutQuad, easeInOutQuad, easeInCubic } from '../utils';
@@ -110,10 +110,10 @@ on('update', () => {
         return;
       } else if (ship.state === 'exit') {
         ship = null;
-        if (!inputs[inputIndex]) {
-          alert('All ships repaired! GG');
-          emit('over');
-        }
+        // if (!inputs[inputIndex]) {
+        //   alert('All ships repaired! GG');
+        //   emit('over');
+        // }
 
         return;
       }

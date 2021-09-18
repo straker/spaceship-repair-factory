@@ -3,7 +3,7 @@ import GameObject from '../utils/game-object';
 import { getPointer, imageAssets } from '../libs/kontra';
 import grid, { toGrid } from '../utils/grid';
 import { rotate } from '../utils';
-import tileatlas from '../assets/tileatlas.json';
+import tileatlas from '../tileatlas.js';
 
 let cursor;
 
@@ -18,7 +18,7 @@ class Cursor extends GameObject {
   }
 
   setImage(name) {
-    let [ a, b, atlasWidth, atlasHeight ] = tileatlas[name] ?? [];
+    let [, , atlasWidth, atlasHeight] = tileatlas[name] ?? [];
     this.name = name;
 
     if (name) {
@@ -51,7 +51,7 @@ class Cursor extends GameObject {
   }
 
   update() {
-    let [ a, b, atlasWidth, atlasHeight ] = tileatlas[this.name] ?? [0, 0, 1, 1];
+    let [, , atlasWidth, atlasHeight] = tileatlas[this.name] ?? [0, 0, 1, 1];
     let pointer = getPointer();
 
     this.x = (toGrid(pointer.x) + (1 - 0.5 * atlasWidth)) * GRID_SIZE;
@@ -80,12 +80,11 @@ class Cursor extends GameObject {
 
   drawOutline({ row = this.row, col = this.col, width, height }) {
     let { context, row: thisRow, col: thisCol } = this;
-    let [ atlasRow, atlasCol ] = tileatlas.CURSOR;
+    let [atlasRow, atlasCol] = tileatlas.CURSOR;
     for (let i = 0; i < 4; i++) {
       let sx =
         i % 2 === 1 ? (atlasCol + 1) * GRID_SIZE - 4 : atlasCol * GRID_SIZE;
-      let sy =
-        i >= 2 ? (atlasRow + 1) * GRID_SIZE - 4 : atlasRow * GRID_SIZE;
+      let sy = i >= 2 ? (atlasRow + 1) * GRID_SIZE - 4 : atlasRow * GRID_SIZE;
       let x = i % 2 === 1 ? width - 4 : 0;
       let y = i >= 2 ? height - 4 : 0;
 
@@ -122,6 +121,24 @@ class Cursor extends GameObject {
       context.restore();
 
       this.drawOutline({ width, height });
+
+      // show dir arrow on any building in the belt menu
+      if (
+        ['BELT', 'IMPORT', 'EXPORT', 'MOVER', 'REPAIRER'].includes(this.name)
+      ) {
+        const [atlasRow, atlasCol, atlasWidth, atlasHeight] = tileatlas.DIR;
+        context.drawImage(
+          imageAssets.tilesheet,
+          atlasCol * GRID_SIZE,
+          atlasRow * GRID_SIZE,
+          atlasWidth * GRID_SIZE,
+          atlasHeight * GRID_SIZE,
+          GRID_SIZE,
+          0,
+          atlasWidth * GRID_SIZE,
+          atlasHeight * GRID_SIZE
+        );
+      }
     } else if (items.length) {
       let item = items.find(item => item.type && item.type !== TYPES.WALL);
 

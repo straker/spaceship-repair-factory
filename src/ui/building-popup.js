@@ -13,7 +13,7 @@ import {
   MINER_DURATIONS
 } from '../constants';
 import { titleCase } from '../utils';
-import tileatlas from '../assets/tileatlas.json';
+import tileatlas from '../tileatlas.js';
 import ImageButton from './image-button';
 import GameObject from '../utils/game-object';
 
@@ -172,7 +172,7 @@ let buildingPopup = {
     this.menuType = building.menuType;
     recipeGrid.children = [];
 
-    let [ a, b, c, atlasHeight ] = tileatlas[building.name];
+    let [, , , atlasHeight] = tileatlas[building.name];
     this.hasClose = hasClose;
     popupGrid.hidden = false;
 

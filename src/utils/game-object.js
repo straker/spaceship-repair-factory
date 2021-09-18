@@ -1,6 +1,6 @@
 import { Sprite, imageAssets } from '../libs/kontra';
 import { GRID_SIZE, DIRS } from '../constants';
-import tileatlas from '../assets/tileatlas.json';
+import tileatlas from '../tileatlas.js';
 
 export default class GameObject extends Sprite.class {
   constructor(properties = {}) {
@@ -10,7 +10,7 @@ export default class GameObject extends Sprite.class {
 
     let atlas = tileatlas[properties.name];
     if (atlas) {
-      let [ a, b, atlasWidth, atlasHeight ] = atlas;
+      let [, , atlasWidth, atlasHeight] = atlas;
       properties.width = atlasWidth * GRID_SIZE;
       properties.height = atlasHeight * GRID_SIZE;
 
@@ -43,7 +43,7 @@ export default class GameObject extends Sprite.class {
     let { name, context, width, height } = this;
     let atlas = tileatlas[name];
     if (atlas) {
-      let [ atlasRow, atlasCol ] = atlas;
+      let [atlasRow, atlasCol] = atlas;
       context.drawImage(
         imageAssets.tilesheet,
         atlasCol * GRID_SIZE,

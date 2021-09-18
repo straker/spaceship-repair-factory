@@ -4,8 +4,8 @@ import {
   initPointer,
   GameLoop,
   emit,
-  on,
-  // loadImage,
+  // on,
+  loadImage,
   imageAssets
 } from './libs/kontra';
 import {
@@ -54,11 +54,7 @@ let wallInfo = {
   40: { dir: DIRS.UP, type: null }
 };
 
-let img = new Image();
-imageAssets.tilesheet = img;
-img.src = 'data:image/webp;base64,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';
-img.onload = () => {
-// loadImage('tilesheet.webp').then(() => {
+loadImage('tilesheet.webp').then(() => {
   let tilesheetCols = imageAssets.tilesheet.width / GRID_SIZE;
 
   let tileCanvas = document.createElement('canvas');
@@ -195,7 +191,7 @@ img.onload = () => {
   });
   loop.start();
 
-  on('over', () => {
-    loop.stop();
-  });
-}
+  // on('over', () => {
+  //   loop.stop();
+  // });
+});

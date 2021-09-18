@@ -11,7 +11,7 @@ const merge = require('merge-stream');
 const cwebp = require('gulp-cwebp');
 const concat = require('gulp-concat-util');
 const terser = require('gulp-terser');
-const kontra = require('rollup-plugin-kontra');
+// const kontra = require('rollup-plugin-kontra');
 const { Packer } = require('roadroller');
 const htmlmin = require('gulp-htmlmin');
 const gulpZip = require('gulp-zip');
@@ -26,26 +26,26 @@ const { name: pkgName } = require('./package.json');
 const rollupConfig = {
   plugins: [
     nodeResolve(),
-    json(),
-    kontra({
-      gameObject: {
-        anchor: true,
-        group: true,
-        opacity: true,
-        rotation: true,
-        scale: true,
-        // for some reason this is needed by the building menubar
-        // grid to correctly update the width of the top-level
-        // menu items and the expanded the submenu
-        velocity: true
-      },
-      sprite: {
-        image: true
-      },
-      text: {
-        autoNewline: true
-      }
-    })
+    json()
+    // kontra({
+    //   gameObject: {
+    //     anchor: true,
+    //     group: true,
+    //     opacity: true,
+    //     rotation: true,
+    //     scale: true,
+    //     // for some reason this is needed by the building menubar
+    //     // grid to correctly update the width of the top-level
+    //     // menu items and the expanded the submenu
+    //     velocity: true
+    //   },
+    //   sprite: {
+    //     image: true
+    //   },
+    //   text: {
+    //     autoNewline: true
+    //   }
+    // })
   ]
 };
 

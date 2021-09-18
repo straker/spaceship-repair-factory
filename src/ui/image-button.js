@@ -1,6 +1,6 @@
 import { Button, imageAssets } from '../libs/kontra';
 import { GRID_SIZE, COLORS } from '../constants';
-import tileatlas from '../assets/tileatlas.json';
+import tileatlas from '../tileatlas.js';
 
 export default class ImageButton extends Button.class {
   constructor(properties) {
@@ -15,7 +15,7 @@ export default class ImageButton extends Button.class {
 
   draw() {
     let { name, context, width, height } = this;
-    let [ atlasRow, atlasCol, atlasWidth, atlasHeight ] = tileatlas[name];
+    let [atlasRow, atlasCol, atlasWidth, atlasHeight] = tileatlas[name];
     let end = GRID_SIZE * (0.5 + atlasWidth);
 
     context.fillStyle = COLORS.BLACK;
