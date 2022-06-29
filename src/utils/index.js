@@ -1,5 +1,9 @@
-import { DIRS } from '../constants';
+import { DIRS, TICK_DURATION } from '../constants';
 import { degToRad } from '../libs/kontra';
+
+export function secondsToTicks(seconds) {
+  return seconds / TICK_DURATION;
+}
 
 export function getSign(number) {
   return number < 0 ? -1 : number > 0 ? 1 : 0;

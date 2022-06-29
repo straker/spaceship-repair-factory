@@ -1,4 +1,5 @@
-import { GRID_SIZE, TYPES, RECIPES } from '../constants';
+import { GRID_SIZE, TYPES } from '../constants';
+import recipes from '../recipes';
 import GameObject from '../utils/game-object';
 import { deepCopy } from '../utils';
 
@@ -8,7 +9,7 @@ export default class Assembler extends GameObject {
     properties.type = TYPES.ASSEMBLER;
     properties.name = 'ASSEMBLER';
     properties.timer = 0;
-    properties.recipe = RECIPES[0];
+    properties.recipe = recipes[0]; // none
     properties.components = [];
     properties.maxComponents = 2; // max input and output number multiplier
     properties.menuType = TYPES.RECIPE;
@@ -37,9 +38,8 @@ export default class Assembler extends GameObject {
     return this.recipe.outputs?.every(output => {
       return (
         this.components.filter(component => component.name === output.name)
-          .length +
-          output.total <=
-        this.maxComponents
+          .length + output.total <=
+        this.maxComponents * output.total
       );
     });
   }

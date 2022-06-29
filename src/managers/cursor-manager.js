@@ -24,6 +24,7 @@ let managers = {
   BELT: beltManager,
   EXPORT: beltManager,
   IMPORT: beltManager,
+  MINER: minerManager,
   'COPPER-MINER': minerManager,
   'IRON-MINER': minerManager,
   'TITANIUM-MINER': minerManager,
@@ -157,7 +158,7 @@ let cursorManager = {
               }
 
               grid.remove(item);
-              storage.refund(item.name);
+              storage.sell(item.name);
             });
         }
       }

@@ -1,10 +1,10 @@
-import { COSTS, COMPONENTS } from '../constants';
+import { COMPONENTS, START_COMPONENTS } from '../constants';
+import buildingCosts from '../building-costs';
 
 let componentStorage = {
   // turn an array into object keys with value 0
   ...COMPONENTS.reduce((acc, curr) => ((acc[curr] = 0), acc), {}),
-  COPPER: 10,
-  IRON: 50,
+  ...START_COMPONENTS,
 
   add({ name, value = 1 }) {
     this[name] += value;
@@ -19,19 +19,19 @@ let componentStorage = {
   },
 
   canBuy(buildingName) {
-    return COSTS[buildingName]?.every(({ name, total }) => {
+    return buildingCosts[buildingName]?.every(({ name, total }) => {
       return this[name] >= total;
     });
   },
 
   buy(buildingName) {
-    COSTS[buildingName]?.forEach(({ name, total }) => {
+    buildingCosts[buildingName]?.forEach(({ name, total }) => {
       this[name] -= total;
     });
   },
 
-  refund(buildingName) {
-    COSTS[buildingName]?.forEach(({ name, total }) => {
+  sell(buildingName) {
+    buildingCosts[buildingName]?.forEach(({ name, total }) => {
       this[name] += total;
     });
   }

@@ -2,6 +2,7 @@ const tileatlas = {
   // [row, col, width, height] of the image in the tilesheet
   NONE: [-1, -1, 1, 1],
   BELT: [0, 0, 1, 1],
+  ASTEROID: [1, 9, 1, 1],
   COPPER: [0, 1, 1, 1],
   IRON: [0, 2, 1, 1],
   TITANIUM: [0, 3, 1, 1],
@@ -26,6 +27,8 @@ const tileatlas = {
   MINER_MENU: [5, 4, 2, 2],
   ASSEMBLER_MENU: [5, 2, 2, 2],
   DELETE_MENU: [5, 8, 2, 2],
+  MINER: [5, 0, 2, 2],
+  MINER_END: [7, 2, 2, 2],
   'COPPER-MINER': [5, 0, 2, 2],
   ASSEMBLER: [5, 2, 2, 2],
   SHIP: [7, 0, 2, 2],

@@ -19,6 +19,7 @@ export let TYPES = {
   INFO: 13
 };
 export let COMPONENTS = [
+  'ASTEROID',
   'COPPER',
   'IRON',
   'TITANIUM',
@@ -29,6 +30,10 @@ export let COMPONENTS = [
   'WATER',
   'FUEL'
 ];
+export let START_COMPONENTS = {
+  COPPER: 150,
+  IRON: 150
+};
 // dir values by name, degree, and radian
 let RIGHT = { row: 0, col: 1 };
 let DOWN = { row: 1, col: 0 };
@@ -66,207 +71,4 @@ export let TEXT_PROPS = {
   anchor: { x: 0, y: 0.5 }
 };
 // miner produce every n game ticks
-export let MINER_DURATIONS = {
-  COPPER: 10,
-  IRON: 10,
-  TITANIUM: 10,
-  HYDROGEN: 10,
-  OXYGEN: 10
-};
-export let RECIPES = [
-  {
-    name: 'NONE',
-    inputs: [
-      {
-        name: 'NONE'
-      }
-    ],
-    outputs: [
-      {
-        name: 'NONE'
-      }
-    ]
-  },
-  {
-    name: 'WIRE',
-    inputs: [
-      {
-        name: 'COPPER',
-        total: 1,
-        has: 0
-      }
-    ],
-    outputs: [
-      {
-        name: 'WIRE',
-        total: 2,
-        has: 0
-      }
-    ],
-    duration: 5 // game ticks
-  },
-  {
-    name: 'CIRCUIT',
-    inputs: [
-      {
-        name: 'WIRE',
-        total: 2,
-        has: 0
-      },
-      {
-        name: 'IRON',
-        total: 1,
-        has: 0
-      }
-    ],
-    outputs: [
-      {
-        name: 'CIRCUIT',
-        total: 1,
-        has: 0
-      }
-    ],
-    duration: 5 // game ticks
-  },
-  {
-    name: 'WATER',
-    inputs: [
-      {
-        name: 'HYDROGEN',
-        total: 1,
-        has: 0
-      },
-      {
-        name: 'OXYGEN',
-        total: 2,
-        has: 0
-      }
-    ],
-    outputs: [
-      {
-        name: 'WATER',
-        total: 1,
-        has: 0
-      }
-    ],
-    duration: 5 // game ticks
-  },
-  {
-    name: 'FUEL',
-    inputs: [
-      {
-        name: 'HYDROGEN',
-        total: 10,
-        has: 0
-      },
-      {
-        name: 'TITANIUM',
-        total: 4,
-        has: 0
-      }
-    ],
-    outputs: [
-      {
-        name: 'FUEL',
-        total: 1,
-        has: 0
-      }
-    ],
-    duration: 5 // game ticks
-  }
-];
-let beltCost = [
-  {
-    name: 'IRON',
-    total: 1
-  }
-];
-export let COSTS = {
-  BELT: beltCost,
-  IMPORT: beltCost,
-  EXPORT: beltCost,
-  MOVER: [
-    {
-      name: 'COPPER',
-      total: 2
-    },
-    {
-      name: 'IRON',
-      total: 2
-    }
-  ],
-  REPAIRER: [
-    {
-      name: 'IRON',
-      total: 50
-    },
-    {
-      name: 'COPPER',
-      total: 50
-    }
-  ],
-  'COPPER-MINER': [
-    {
-      name: 'IRON',
-      total: 5
-    }
-  ],
-  'IRON-MINER': [
-    {
-      name: 'COPPER',
-      total: 10
-    }
-  ],
-  'TITANIUM-MINER': [
-    {
-      name: 'COPPER',
-      total: 50
-    },
-    {
-      name: 'IRON',
-      total: 25
-    },
-    {
-      name: 'CIRCUIT',
-      total: 25
-    }
-  ],
-  'HYDROGEN-EXTRACTOR': [
-    {
-      name: 'IRON',
-      total: 50
-    },
-    {
-      name: 'TITANIUM',
-      total: 25
-    },
-    {
-      name: 'CIRCUIT',
-      total: 100
-    }
-  ],
-  'OXYGEN-EXTRACTOR': [
-    {
-      name: 'IRON',
-      total: 25
-    },
-    {
-      name: 'TITANIUM',
-      total: 50
-    },
-    {
-      name: 'CIRCUIT',
-      total: 100
-    }
-  ],
-  ASSEMBLER: [
-    {
-      name: 'COPPER',
-      total: 25
-    },
-    {
-      name: 'IRON',
-      total: 25
-    }
-  ]
-};
+export let MINER_DURATION = 20;

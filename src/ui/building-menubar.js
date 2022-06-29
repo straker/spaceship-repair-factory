@@ -130,24 +130,8 @@ let buildingMenuBar = {
     let minerMenu = createButton({
       name: 'MINER_MENU'
     });
-    let copperMinerMenuItem = createButton({
-      name: 'COPPER-MINER',
-      child: true
-    });
-    let ironMinerMenuItem = createButton({
-      name: 'IRON-MINER',
-      child: true
-    });
-    let titaniumMinerMenuItem = createButton({
-      name: 'TITANIUM-MINER',
-      child: true
-    });
-    let hydrogenMinerMenuItem = createButton({
-      name: 'HYDROGEN-EXTRACTOR',
-      child: true
-    });
-    let oxygenMinerMenuItem = createButton({
-      name: 'OXYGEN-EXTRACTOR',
+    let minerMenuItem = createButton({
+      name: 'MINER',
       child: true
     });
 
@@ -197,11 +181,7 @@ let buildingMenuBar = {
       grid: minerMenuGrid,
       parent: minerMenu,
       children: [
-        copperMinerMenuItem,
-        ironMinerMenuItem,
-        titaniumMinerMenuItem,
-        hydrogenMinerMenuItem,
-        oxygenMinerMenuItem
+        minerMenuItem
       ]
     };
     menuHierarchy.ASSEMBLER_MENU = {

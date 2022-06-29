@@ -1,26 +1,25 @@
 import { on } from '../libs/kontra';
-import CopperMiner from '../buildings/copper-miner';
-import IronMiner from '../buildings/iron-miner';
-import TitaniumMiner from '../buildings/titanium-miner';
-import HydrogenMiner from '../buildings/hydrogen-miner';
-import OxygenMiner from '../buildings/oxygen-miner';
+import Miner from '../buildings/miner';
 import { layers } from '../assets/tilemap.json';
 import { NUM_COLS } from '../constants';
 import { removeFromArray } from '../utils';
 
 let miners = [];
-let Constructors = {
-  'COPPER-MINER': CopperMiner,
-  'IRON-MINER': IronMiner,
-  'TITANIUM-MINER': TitaniumMiner,
-  'HYDROGEN-EXTRACTOR': HydrogenMiner,
-  'OXYGEN-EXTRACTOR': OxygenMiner
-};
-
 let minerManager = {
   init() {
+    let timer = 0;
+    let name = '';
+
     on('gameTick', () => {
+      // update animation every 3 game ticks
+      if (++timer === 3) {
+        timer = 0;
+        name = name === '' ? '_END' : '';
+      }
+
       miners.forEach(miner => {
+        miner.name = 'MINER' + name;
+
         let { components, maxComponents } = miner;
         miner.timer = ++miner.timer % miner.duration;
         if (miner.timer === 0 && components.length < maxComponents) {
@@ -34,7 +33,7 @@ let minerManager = {
   },
 
   add(properties) {
-    let miner = new Constructors[properties.name](properties);
+    let miner = new Miner(properties);
     miners.push(miner);
     return miner;
   },

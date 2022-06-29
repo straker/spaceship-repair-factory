@@ -5,15 +5,15 @@ import {
   TEXT_PROPS,
   TYPES,
   COMPONENTS,
-  RECIPES,
   GAME_WIDTH,
   GAME_HEIGHT,
   TICK_DURATION,
-  COSTS,
-  MINER_DURATIONS
+  MINER_DURATION
 } from '../constants';
+import buildingCosts from '../building-costs';
+import recipes from '../recipes';
 import { titleCase } from '../utils';
-import tileatlas from '../tileatlas.js';
+import tileatlas from '../tileatlas';
 import ImageButton from './image-button';
 import GameObject from '../utils/game-object';
 
@@ -28,8 +28,8 @@ let textProps = {
 };
 
 function minerText(name) {
-  return `Produces 1 ${titleCase(name)} every ${
-    MINER_DURATIONS[name]
+  return `Mines 1 ${titleCase(name)} every ${
+    MINER_DURATION * TICK_DURATION
   } seconds. Can only be placed in rooms with a minable resource tile.`;
 }
 
@@ -39,6 +39,7 @@ let uiText = {
     'Moves items from behind the Mover to the building or belt in front of it. Select once placed to filter which items it moves.',
   REPAIRER:
     'Moves items from behind the Repairer to the docked ship. Can only be placed on the tiles next to the ship docking station.',
+  'MINER': minerText('ASTEROID'),
   'COPPER-MINER': minerText('COPPER'),
   'IRON-MINER': minerText('IRON'),
   'TITANIUM-MINER': minerText('TITANIUM'),
@@ -182,8 +183,8 @@ let buildingPopup = {
 
     name.text = titleCase(buildingName);
 
-    // filter menu
     switch (building.menuType) {
+      // filter menu
       case TYPES.FILTER: {
         popupGrid.numCols = 5;
         let title = Text({
@@ -208,6 +209,7 @@ let buildingPopup = {
         break;
       }
 
+      // ship repair requirements
       case TYPES.SHIP: {
         popupGrid.numCols = 10;
         let title = Text({
@@ -233,6 +235,7 @@ let buildingPopup = {
         break;
       }
 
+      // assembler recipe
       case TYPES.RECIPE: {
         popupGrid.numCols = 5;
         recipeGrid.children = getRecipe(building.recipe);
@@ -243,7 +246,7 @@ let buildingPopup = {
           colSpan: popupGrid.numCols,
           text: 'Recipe:'
         });
-        let components = [...RECIPES].map(recipe => {
+        let components = [...recipes].map(recipe => {
           return new ImageButton({
             name: recipe.name,
             width: GRID_SIZE,
@@ -261,13 +264,20 @@ let buildingPopup = {
         break;
       }
 
+      // top-level menubar tooltip
       case TYPES.TIP: {
         popupGrid.hidden = true;
         name.text += ' Menu';
         break;
       }
 
+      // sub-menu menubar building info
       case TYPES.INFO: {
+        // show miner production icon
+        if (building.type === TYPES.MINER) {
+
+        }
+
         popupGrid.numCols = 5;
         let title = Text({
           ...textProps,
@@ -275,7 +285,7 @@ let buildingPopup = {
           text: 'Cost:'
         });
         let recipe = {
-          inputs: COSTS[buildingName]
+          inputs: buildingCosts[buildingName]
         };
         let info = Text({
           ...textProps,
