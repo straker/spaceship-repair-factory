@@ -1,11 +1,12 @@
-import { GRID_SIZE, TYPES } from '../constants';
-import GameObject from '../utils/game-object';
+import { GRID_SIZE, TYPES } from '../constants.js';
+import { i18n } from '../data/translations.js';
+import GameObject from '../utils/game-object.js';
 
 export default class Belt extends GameObject {
   constructor(properties) {
     properties.width = properties.height = GRID_SIZE;
-    properties.type = TYPES.BELT;
-    properties.name = 'BELT';
+    properties.type = TYPES.belt;
+    properties.name = i18n('Belt');
 
     super(properties);
   }
@@ -15,16 +16,18 @@ export default class Belt extends GameObject {
   }
 
   draw() {
-    super.draw();
+    const { context, width, height } = this;
+    context.fillStyle = '#fff';
+    context.fillRect(0, 0, width, 2);
+    context.fillRect(0, height - 2, width, 2);
+    context.beginPath();
 
-    // debug purposes
-    // let { segment, context, width, height } = this;
-    // if (segment?.start === this) {
-    //   context.fillStyle = 'rgba(255, 0, 0, 0.5';
-    //   context.fillRect(0, 0, width, height);
-    // } else if (segment?.end === this) {
-    //   context.fillStyle = 'rgba(0, 0, 255, 0.5';
-    //   context.fillRect(0, 0, width, height);
-    // }
+    const triWidth = 15;
+    const triHeight = 13;
+
+    context.moveTo(width / 2 - triHeight / 2, height / 2 - triWidth / 2);
+    context.lineTo(width / 2 + triHeight / 2, height / 2);
+    context.lineTo(width / 2 - triHeight / 2, height / 2 + triWidth / 2);
+    context.fill();
   }
 }

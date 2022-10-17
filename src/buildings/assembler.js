@@ -1,57 +1,21 @@
-import { GRID_SIZE, TYPES, RECIPES } from '../constants';
-import GameObject from '../utils/game-object';
-import { deepCopy } from '../utils';
+import { GRID_SIZE, TYPES } from '../constants.js';
+import { i18n } from '../data/translations.js';
+import GameObject from '../utils/game-object.js';
+import { recipies } from '../data/components';
 
 export default class Assembler extends GameObject {
   constructor(properties) {
-    properties.width = properties.height = GRID_SIZE * 2;
-    properties.type = TYPES.ASSEMBLER;
-    properties.name = 'ASSEMBLER';
-    properties.timer = 0;
-    properties.recipe = RECIPES[0];
+    properties.width = properties.height = GRID_SIZE;
+    properties.type = TYPES.assembler;
+    properties.name = i18n('Assembler');
+    properties.recipie = recipies.none;
     properties.components = [];
-    properties.maxComponents = 2; // max input and output number multiplier
-    properties.menuType = TYPES.RECIPE;
-
-    super(properties);
+    properties.maxComponents = super(properties);
   }
 
-  setRecipe(recipe) {
-    this.components = [];
-    this.recipe.inputs?.forEach(input => {
-      input.has = 0;
-    });
-    this.recipe = deepCopy(recipe);
+  canTakeComponent() {
+    return !this.component;
   }
 
-  getInput(component) {
-    return this.recipe.inputs?.find(input => input.name === component.name);
-  }
-
-  addComponent(component) {
-    let input = this.getInput(component);
-    input.has++;
-  }
-
-  canProduce() {
-    return this.recipe.outputs?.every(output => {
-      return (
-        this.components.filter(component => component.name === output.name)
-          .length +
-          output.total <=
-        this.maxComponents
-      );
-    });
-  }
-
-  hasRequiredInputs() {
-    return this.recipe.inputs?.every(input => {
-      return input.has >= input.total;
-    });
-  }
-
-  canTakeComponent(component) {
-    let input = this.getInput(component);
-    return input?.has < this.maxComponents * input?.total;
-  }
+  draw() {}
 }

@@ -1,66 +1,54 @@
-import { TYPES, DIRS } from '../constants';
-import grid from '../utils/grid';
-import { rotate, removeFromArray } from '../utils';
-import Belt from '../buildings/belt';
-import ExportBelt from '../buildings/export-belt';
-import ImportBelt from '../buildings/import-belt';
+import { TYPES } from '../constants.js';
+import grid from '../utils/grid.js';
+import { removeFromArray } from '../utils/index.js';
+import Belt from '../buildings/belt.js';
 
-export let beltSegments = [];
+export const beltSegments = [];
 
-let beltManager = {
+const beltManager = {
   init() {},
 
   add(properties) {
-    // auto place import / export belt from a belt
-    let item = grid.get(properties)[0];
-    let belt;
+    const item = grid.get(properties)[0];
+    if (item) {
+      return;
+    }
 
-    if (!item) {
-      belt = new Belt(properties);
-    }
-    // import / export belt
-    else {
-      // import belt goes same direction as well
-      if (properties.dir === item.dir) {
-        belt = new ExportBelt(properties);
-      } else {
-        belt = new ImportBelt(properties);
-      }
-    }
+    const belt = new Belt(properties);
 
     // get neighboring belts
-    let { row, col, dir } = belt;
-    let nextBelt = grid.getByType(
+    const { row, col, dir } = belt;
+    const nextBelt = grid.getByType(
       {
         row: row + dir.row,
         col: col + dir.col
       },
-      TYPES.BELT
+      TYPES.belt
     )[0];
-    let prevBelt = grid.getByType(
+    const prevBelt = grid.getByType(
       {
         row: row - dir.row,
         col: col - dir.col
       },
-      TYPES.BELT
+      TYPES.belt
     )[0];
-    let sideBelt1 = grid.getByType(
+    const sideBelt1 = grid.getByType(
       {
         row: row + dir.col,
         col: col + dir.row
       },
-      TYPES.BELT
+      TYPES.belt
     )[0];
-    let sideBelt2 = grid.getByType(
+    const sideBelt2 = grid.getByType(
       {
         row: row - dir.col,
         col: col - dir.row
       },
-      TYPES.BELT
+      TYPES.belt
     )[0];
 
-    let prevSameDir = prevBelt?.dir === dir;
-    let nextSameDir = nextBelt?.dir === dir;
+    const prevSameDir = prevBelt?.dir === dir;
+    const nextSameDir = nextBelt?.dir === dir;
 
     // create doubly linked list
     if (nextBelt) {
@@ -102,7 +90,7 @@ let beltManager = {
       // merge segments if going the same direction
       if (nextSameDir) {
         if (belt.segment) {
-          let removeSegment = nextBelt.segment;
+          const removeSegment = nextBelt.segment;
 
           belt.segment.end = nextBelt.segment.end;
           let b = nextBelt;
@@ -125,25 +113,26 @@ let beltManager = {
       }
     }
 
+    grid.add(belt);
     return belt;
   },
 
   remove(belt) {
     // get neighboring belts
-    let { row, col, dir, segment, prevBelt, nextBelt } = belt;
-    let sideBelt1 = grid.getByType(
+    const { row, col, dir, segment, prevBelt, nextBelt } = belt;
+    const sideBelt1 = grid.getByType(
       {
         row: row + dir.col,
         col: col + dir.row
       },
-      TYPES.BELT
+      TYPES.belt
     )[0];
-    let sideBelt2 = grid.getByType(
+    const sideBelt2 = grid.getByType(
       {
         row: row - dir.col,
         col: col - dir.row
       },
-      TYPES.BELT
+      TYPES.belt
     )[0];
 
     // only belt in the segment
@@ -153,12 +142,12 @@ let beltManager = {
 
     // split a belt segment in half
     if (prevBelt?.segment === segment && nextBelt?.segment === segment) {
-      let prevSegment = {
+      const prevSegment = {
         start: segment.start,
         end: prevBelt,
         updated: segment.updated
       };
-      let nextSegment = {
+      const nextSegment = {
         start: nextBelt,
         end: segment.end,
         updated: segment.updated
@@ -177,7 +166,7 @@ let beltManager = {
 
       // inject new segments into the place of the old one so
       // update / render order remains the same
-      let index = removeFromArray(beltSegments, segment);
+      const index = removeFromArray(beltSegments, segment);
       if (index > -1) {
         beltSegments.splice(index, 0, ...[prevSegment, nextSegment]);
       }
@@ -206,23 +195,13 @@ let beltManager = {
 
     belt.prevBelt = null;
     belt.nextBelt = null;
+    grid.remove(belt);
   },
 
   canPlace(cursor, items) {
-    // belts can only be placed on empty spots but import / export
-    // belts can be placed on walls that match their dir
-    return (
-      !items.length ||
-      (items.length &&
-        items.every(
-          item =>
-            item.type === TYPES.WALL &&
-            item.dir &&
-            cursor.dir &&
-            (item.dir === cursor.dir || item.dir === DIRS[rotate(cursor, 180)])
-        ))
-    );
+    return !items.length;
   }
 };
 
 export default beltManager;
+window.beltManager = beltManager;

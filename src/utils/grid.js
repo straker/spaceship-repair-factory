@@ -1,5 +1,5 @@
-import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT, TYPES } from '../constants';
-import { removeFromArray } from './index';
+import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT, TYPES } from '../constants.js';
+import { removeFromArray } from './index.js';
 
 let objects = [];
 let tiles = [];

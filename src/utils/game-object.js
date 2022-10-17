@@ -1,23 +1,10 @@
-import { Sprite, imageAssets } from '../libs/kontra';
-import { GRID_SIZE, DIRS } from '../constants';
-import tileatlas from '../tileatlas.js';
+import { SpriteClass } from '../libs/kontra.js';
+import { DIRS } from '../constants.js';
 
-export default class GameObject extends Sprite.class {
+export default class GameObject extends SpriteClass {
   constructor(properties = {}) {
     if (!properties.anchor) {
       properties.anchor = { x: 0.5, y: 0.5 };
-    }
-
-    let atlas = tileatlas[properties.name];
-    if (atlas) {
-      let [, , atlasWidth, atlasHeight] = atlas;
-      properties.width = atlasWidth * GRID_SIZE;
-      properties.height = atlasHeight * GRID_SIZE;
-
-      if (!properties.x) {
-        properties.x = (properties.col + (1 - 0.5 * atlasWidth)) * GRID_SIZE;
-        properties.y = (properties.row + (1 - 0.5 * atlasHeight)) * GRID_SIZE;
-      }
     }
 
     properties.dir = DIRS[properties.rotation];
@@ -37,24 +24,5 @@ export default class GameObject extends Sprite.class {
 
   canTakeComponent() {
     return false;
-  }
-
-  draw() {
-    let { name, context, width, height } = this;
-    let atlas = tileatlas[name];
-    if (atlas) {
-      let [atlasRow, atlasCol] = atlas;
-      context.drawImage(
-        imageAssets.tilesheet,
-        atlasCol * GRID_SIZE,
-        atlasRow * GRID_SIZE,
-        width,
-        height,
-        0,
-        0,
-        width,
-        height
-      );
-    }
   }
 }
