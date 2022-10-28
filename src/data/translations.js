@@ -4,6 +4,8 @@ import { config } from './config.js';
 const translations = {};
 let curLang = 'en';
 
+// TODO: how can mods add support for translations not mainly supported (e.g. support French if French is not a translation I released with)?
+
 /**
  * Get the current language translation for a key.
  * @param {String} key - Key to get translation for.

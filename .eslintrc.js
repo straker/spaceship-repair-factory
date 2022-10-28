@@ -22,6 +22,17 @@ module.exports = {
         node: true,
         es2021: true
       }
+    },
+    {
+      files: ['test/**/*.*'],
+      env: {
+        mocha: true,
+        node: true,
+        es2021: true
+      },
+      globals: {
+        assert: true
+      }
     }
   ]
 };

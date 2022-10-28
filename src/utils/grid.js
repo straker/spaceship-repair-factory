@@ -1,10 +1,10 @@
-import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT, TYPES } from '../constants.js';
+import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT } from '../constants.js';
 import { removeFromArray } from './index.js';
 
 let objects = [];
 let tiles = [];
-let rows = GAME_HEIGHT / GRID_SIZE;
-let cols = GAME_WIDTH / GRID_SIZE;
+let rows = (GAME_HEIGHT / GRID_SIZE) | 0;
+let cols = (GAME_WIDTH / GRID_SIZE) | 0;
 
 for (let row = 0; row < rows; row++) {
   tiles[row] = [];
@@ -27,7 +27,7 @@ function forEachTile([startRow, startCol, endRow, endCol], cb) {
   }
 }
 
-let grid = {
+const grid = {
   objects,
 
   add(obj) {
@@ -38,10 +38,7 @@ let grid = {
     let startCol = obj.col - toGrid(obj.width - 1);
 
     forEachTile([startRow, startCol, obj.row, obj.col], tile => tile.push(obj));
-
-    if (obj.type && obj.type !== TYPES.WALL) {
-      objects.push(obj);
-    }
+    objects.push(obj);
   },
 
   remove(obj) {
@@ -62,7 +59,7 @@ let grid = {
   },
 
   getByType(pos, type) {
-    return this.get(pos).filter(obj => obj.type === type);
+    return this.get(pos).filter(obj => obj.type & type);
   },
 
   getAll(obj) {

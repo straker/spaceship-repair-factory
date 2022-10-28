@@ -1,2 +1,7 @@
-,Iron,Nickel,Silcon,Titanium,Platinum,Palladium,Iridium,Hydrogen,Oxygen,Nitrogen,Wire,Magnet,Electromagnet,Superconducting Electromagnet,Steel,Electronics I,Electronics II,Electronics III,Iron Hull Patch
-Extractor,10,,,,,,,,,,,,,,,1,,,
+,Type,Inventory slots,max items,Image,Behavior,Options
+Extractor I,,,,,,
+Belt I,transport,1,1,/src/assets/belt-I.png,,
+Assembler I,,,,/src/assets/assembler-I.png,craftItem,
+Storage,,12,,/src/assets/storage.png,spawnItem,"{""item"": ""Iron Ore"", ""amount"": 1, ""rate"": 1}"
+,,,,,spawnItem,"{""item"": ""Iron"", ""amount"": 1, ""rate"": 1}"
+Arm,,1,1,/src/assets/arm.png,takeAndMoveItem,"{""amount"": 1, ""rate"": 0.5}"

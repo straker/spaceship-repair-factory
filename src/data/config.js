@@ -5,18 +5,26 @@ export const config = {
     // TODO: remove once done testing
     {
       name: 'Foobar',
-      components: {
+      items: {
         foobar: {
           raw: true,
-          enabled: true
+          enabled: true,
+          type: 'component'
         }
+        // Iron: {
+        //   stackSize: 1
+        // }
       },
       recipes: {
         foobar: {
           enabled: true,
           time: 1,
-          inputs: ['Iron', 5],
-          output: 1
+          inputs: [['Iron', 5]],
+          output: [['foobar', 1]]
+        },
+        Wire: {
+          time: 1,
+          outputs: [['Nickel', 3]]
         }
       },
       translations: {

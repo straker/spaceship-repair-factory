@@ -5,7 +5,10 @@
   "main": ".eslintrc.js",
   "scripts": {
     "start": "http-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "karma start test/karma.conf.js --single-run",
+    "test:watch": "karma start test/karma.conf.js",
+    "test:debug": "karma start test/karma.conf.js --browsers Chrome",
+    "eslint": "eslint --color --format stylish '{src,test}/**/*.js'"
   },
   "repository": {
     "type": "git",
@@ -18,11 +21,20 @@
   },
   "homepage": "https://github.com/straker/spaceship-repair-factory#readme",
   "devDependencies": {
+    "chai": "^4.3.6",
     "eslint": "^8.25.0",
     "http-server": "^14.1.1",
     "husky": "^8.0.1",
+    "karma": "^6.4.1",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^3.1.1",
+    "karma-mocha": "^2.0.1",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-sinon": "^1.0.5",
     "lint-staged": "^13.0.3",
-    "prettier": "^2.7.1"
+    "mocha": "^10.1.0",
+    "prettier": "^2.7.1",
+    "sinon": "^14.0.1"
   },
   "lint-staged": {
     "*.js": "eslint --cache --fix",
