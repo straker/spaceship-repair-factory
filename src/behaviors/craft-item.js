@@ -6,68 +6,39 @@ import { MAX_CRAFT_STORAGE } from '../constants.js';
  * Allows a building to craft an item from inputs.
  * @param {Building} building - Object the behavior applies to.
  * @param {Object} options - Behavior options.
+ * @param {Number} options.speed=1 - How quickly the building can craft the item.
  */
-const craftItem = {
+const craftItemBehavior = {
   buildings: [],
-  add(building, options) {
-    // a building can only craft one item at a time
-    if (building.behaviors.craftItem) {
-      // TODO: warn of second craft
-      return;
-    }
+  add(building, options = {}) {
+    // a building can only craft one item at a time, so take
+    // the last craft options
+    if (!building.behaviors.craftItem) {
+      // override existing functions
+      building._addItem = building.addItem.bind(building);
+      building._removeItem = building.removeItem.bind(building);
+      building._canAddItem = building.canAddItem.bind(building);
 
-    // override existing functions
-    building._addItem = building.addItem.bind(building);
-    building._removeItem = building.removeItem.bind(building);
-    building._canAddItem = building.canAddItem.bind(building);
+      Object.assign(building, deepCopy(craftingProperties));
+    } else {
+      building.behaviors.craftItem[0].remove();
+    }
 
     // add required properties to building
     building.maxCraftStorage = options.maxCraftStorage ?? MAX_CRAFT_STORAGE;
-    Object.assign(building, deepCopy(craftingProperties));
-
     addBehaviorToBuilding('craftItem', building, this, {
       dt: 0,
+      speed: 1,
       ...options
     });
   },
   run(dt) {
     this.buildings.forEach(building => {
-      const { recipe, inputs } = building;
-
-      if (!recipe) {
-        return;
-      }
-
-      // start crafting if building has required inputs
-      if (!building.crafting) {
-        if (!building.hasRequiredInputs()) {
-          return;
-        }
-
-        building.crafting = true;
-        recipe.inputs.every(([, amount], index) => {
-          inputs[index][1] -= amount;
-        });
-      }
-
-      const { outputs, time } = recipe;
-      const { craftItem } = building.behaviors;
-      craftItem.dt += dt;
-
-      // can't move an item twice in one update
-      if (craftItem.dt < time) {
-        return;
-      }
-
-      building.crafting = false;
-
-      outputs.forEach(([item, output]) => {
-        building.addItem(item, output);
-      });
+      building.craftItem(dt);
     });
   }
 };
-export default craftItem;
+export default craftItemBehavior;
 
 // TODO: should also allow selecting recipe from list
 // will need to know which recipes are valid selections
@@ -105,6 +76,8 @@ const craftingProperties = {
     recipe.outputs.forEach(([name], index) => {
       this.outputs[index] = [name, 0];
     });
+    this.behaviors.craftItem.dt = 0;
+    this.crafting = false;
   },
 
   /**
@@ -145,6 +118,72 @@ const craftingProperties = {
   },
 
   /**
+   * Craft an item using the building's current recipe.
+   * @param {Number} dt- Time update.
+   */
+  craftItem(dt) {
+    const {
+      crafting,
+      inputs,
+      outputs,
+      recipe,
+      maxCraftStorage,
+      craftFromInventory,
+      outputsToInventory,
+      _removeItem,
+      _addItem
+    } = this;
+
+    if (!recipe) {
+      return;
+    }
+
+    // start crafting if building has required inputs
+    if (!crafting) {
+      if (!this.hasRequiredInputs()) {
+        return;
+      }
+
+      this.crafting = true;
+
+      inputs.forEach((input, index) => {
+        let amount = recipe.inputs[index][1];
+        amount -= removeFromStack(input, amount, inputs, {
+          deleteStack: false
+        });
+
+        if (craftFromInventory) {
+          _removeItem(input[0], amount);
+        }
+      });
+    }
+
+    const { time } = recipe;
+    const craftItem = this.behaviors.craftItem[0];
+
+    // TODO: research can affect crafting time
+    craftItem.dt += dt * craftItem.speed;
+
+    // can't craft an item twice in one update
+    if (craftItem.dt < time) {
+      return;
+    }
+
+    this.crafting = false;
+    craftItem.dt = 0;
+
+    recipe.outputs.forEach(([name, amount], index) => {
+      const output = outputs[index];
+      const max = amount * maxCraftStorage;
+      amount -= addToStack(output, amount, max);
+
+      if (outputsToInventory) {
+        _addItem(name, amount);
+      }
+    });
+  },
+
+  /**
    * Determine if building input has room for an item.
    * @param {String} item - Name of the item.
    * @return {Boolean}
@@ -157,45 +196,6 @@ const craftingProperties = {
     });
 
     return canAddToInputs || (inputsToInventory && _canAddItem(item));
-  },
-
-  /**
-   * Craft an item using the building's current recipe.
-   */
-  craftItem() {
-    if (!this.hasRequiredInputs()) {
-      return;
-    }
-
-    const {
-      inputs,
-      outputs,
-      recipe,
-      maxCraftStorage,
-      craftFromInventory,
-      outputsToInventory,
-      _removeItem,
-      _addItem
-    } = this;
-
-    inputs.forEach((input, index) => {
-      let amount = recipe.inputs[index][1];
-      amount -= removeFromStack(input, amount, inputs, { deleteStack: false });
-
-      if (craftFromInventory) {
-        _removeItem(input[0], amount);
-      }
-    });
-
-    recipe.outputs.forEach(([name, amount], index) => {
-      const output = outputs[index];
-      const max = amount * maxCraftStorage;
-      amount -= addToStack(output, amount, max);
-
-      if (outputsToInventory) {
-        _addItem(name, amount);
-      }
-    });
   },
 
   /**

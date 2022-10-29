@@ -31,7 +31,8 @@ module.exports = {
         es2021: true
       },
       globals: {
-        assert: true
+        assert: true,
+        sinon: true
       }
     }
   ]

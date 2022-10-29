@@ -13,6 +13,12 @@ import { addBehaviorToBuilding } from './utils.js';
 const takeAndMoveItem = {
   buildings: [],
   add(building, options) {
+    // a building can only take one item at a time
+    if (building.behaviors.takeAndMoveItem) {
+      // TODO: warn of second take and move
+      return;
+    }
+
     addBehaviorToBuilding('takeAndMoveItem', building, this, {
       dt: 0,
       ...options
@@ -20,49 +26,52 @@ const takeAndMoveItem = {
   },
   run(dt) {
     this.buildings.forEach(building => {
-      building.behaviors.takeAndMoveItem.forEach(takeAndMoveItem => {
-        const { amount, rate } = takeAndMoveItem;
-        takeAndMoveItem.dt += dt;
-
-        // can't move an item twice in one update
-        if (takeAndMoveItem.dt < rate) {
-          return;
-        }
-
-        takeAndMoveItem.dt -= rate;
-        const { dir } = building;
-        const fromBuilding = grid.getByType(
-          getPrevPos(building, dir),
-          TYPES.building
-        )[0];
-
-        // can only take from buildings that have inventory
-        if (!fromBuilding || fromBuilding.inventory.length === 0) {
-          return;
-        }
-
-        // TODO: filtering
-        const [item] = fromBuilding.getLastItem();
-        const toBuilding = grid.getByType(
-          getNextPos(building, dir),
-          TYPES.building
-        )[0];
-
-        // can only place into buildings that have room for
-        // the item
-        if (!toBuilding || !toBuilding.canAddItem(item)) {
-          return;
-        }
-
-        const takenAmount = fromBuilding.removeItem(item, amount);
-        toBuilding.addItem(item, takenAmount);
-
-        // TODO: add leftover to self?
-        // if (takenAmount - addedAmount !== 0) {
-        //   object.addItem(item, takenAmount - addedAmount);
-        // }
-      });
+      _takeAndMoveItemBehavior(building, dt);
     });
   }
 };
 export default takeAndMoveItem;
+
+// expose for testing
+export function _takeAndMoveItemBehavior(building, dt) {
+  const { amount, rate } = takeAndMoveItem;
+  takeAndMoveItem.dt += dt;
+
+  // can't move an item twice in one update
+  if (takeAndMoveItem.dt < rate) {
+    return;
+  }
+
+  takeAndMoveItem.dt -= rate;
+  const { dir } = building;
+  const fromBuilding = grid.getByType(
+    getPrevPos(building, dir),
+    TYPES.building
+  )[0];
+
+  // can only take from buildings that have inventory
+  if (!fromBuilding || fromBuilding.inventory.length === 0) {
+    return;
+  }
+
+  // TODO: filtering
+  const [item] = fromBuilding.getLastItem();
+  const toBuilding = grid.getByType(
+    getNextPos(building, dir),
+    TYPES.building
+  )[0];
+
+  // can only place into buildings that have room for
+  // the item
+  if (!toBuilding || !toBuilding.canAddItem(item)) {
+    return;
+  }
+
+  const takenAmount = fromBuilding.removeItem(item, amount);
+  toBuilding.addItem(item, takenAmount);
+
+  // TODO: add leftover to self?
+  // if (takenAmount - addedAmount !== 0) {
+  //   object.addItem(item, takenAmount - addedAmount);
+  // }
+}

@@ -1,9 +1,9 @@
-import craftItem from './craft-item.js';
+import craftItemBehavior from './craft-item.js';
 import spawnItem from './spawn-item.js';
 import takeAndMoveItem from './take-and-move-item.js';
 
 export const behaviors = {
-  craftItem,
+  craftItem: craftItemBehavior,
   spawnItem,
   takeAndMoveItem
 };
