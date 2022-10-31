@@ -4,4 +4,4 @@ Belt I,transport,1,1,/src/assets/belt-I.png,,
 Assembler I,,,,/src/assets/assembler-I.png,craftItem,
 Storage,,12,,/src/assets/storage.png,spawnItem,"{""item"": ""Iron Ore"", ""amount"": 1, ""rate"": 1}"
 ,,,,,spawnItem,"{""item"": ""Iron"", ""amount"": 1, ""rate"": 1}"
-Arm,,1,1,/src/assets/arm.png,takeAndMoveItem,"{""amount"": 1, ""rate"": 0.5}"
+Arm,,1,,/src/assets/arm.png,takeAndMoveItem,"{""amount"": 1, ""rate"": 0.5}"

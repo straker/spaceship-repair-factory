@@ -1,33 +1,38 @@
-import { addBehaviorToBuilding } from './utils.js';
+import Behavior from './behavior.js';
 
-/**
- * Allows a building to spawn a item on a set interval.
- * @param {Building} building - Building the behavior applies to.
- * @param {Object} options - Behavior options.
- * @param {String} options.item - Name of the item to spawn.
- * @param {Number} options.amount - Number of items to spawn.
- * @param {Number} options.rate - How often (in seconds) to spawn the item.
- */
-const spawnItem = {
-  buildings: [],
-  add(building, options) {
-    addBehaviorToBuilding('spawnItem', building, this, {
+class SpawnItemBehavior extends Behavior {
+  constructor() {
+    super('spawnItem');
+  }
+
+  /**
+   * Allows a building to spawn a item into its inventory.
+   * @param {Building} building - Building the behavior applies to.
+   * @param {Object} options - Behavior options.
+   * @param {String} options.item - Name of the item to spawn.
+   * @param {Number} options.amount - Number of items to spawn.
+   * @param {Number} options.rate - How often (in seconds) to spawn the item.
+   */
+  add(building, options = {}) {
+    super.add(building, {
       dt: 0,
+      allowMultiple: true,
       ...options
     });
-  },
-  run(dt) {
-    this.buildings.forEach(building => {
-      building.behaviors.spawnItem.forEach(spawnItem => {
-        const { item, rate, amount } = spawnItem;
-        spawnItem.dt += dt;
+  }
 
-        while (spawnItem.dt >= rate) {
-          spawnItem.dt -= rate;
-          building.addItem(item, amount);
-        }
-      });
+  _behavior(building, dt) {
+    building.behaviors.spawnItem.forEach(spawnItem => {
+      const { item, rate, amount } = spawnItem;
+      spawnItem.dt += dt;
+
+      while (spawnItem.dt >= rate) {
+        spawnItem.dt -= rate;
+        building.addItem(item, amount);
+      }
     });
   }
-};
-export default spawnItem;
+}
+
+const spawnItemBehavior = new SpawnItemBehavior();
+export default spawnItemBehavior;

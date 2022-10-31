@@ -20,6 +20,8 @@ describe('building', () => {
     delete items.foo;
   });
 
+  // TODO: incomplete, need more tests for constructor and destroy
+
   describe('addItem', () => {
     describe('when stack does not exist', () => {
       it('should create new inventory stack', () => {
@@ -207,8 +209,8 @@ describe('building', () => {
     });
   });
 
-  describe('getLastItem', () => {
-    it('should return last inventory slot', () => {
+  describe('getItems', () => {
+    it('should return all items in reverse order', () => {
       building.inventory = [
         ['Iron', 95],
         undefined,
@@ -216,8 +218,11 @@ describe('building', () => {
         undefined,
         undefined
       ];
-      const slot = building.getLastItem();
-      assert.equal(slot, building.inventory[2]);
+      const items = building.getItems();
+      assert.deepEqual(items, [
+        ['Iron Ore', 5],
+        ['Iron', 95]
+      ]);
     });
   });
 
@@ -264,6 +269,20 @@ describe('building', () => {
         ['Iron', 95]
       ];
       assert.isFalse(building.canAddItem('foo'));
+    });
+  });
+
+  describe('getAmountCanAdd', () => {
+    it('should return the total number of the item that can be added', () => {
+      building.inventory = [
+        ['foo', 95],
+        ['foo', 90],
+        ['foo Ore', 5],
+        ['foo', 100],
+        undefined
+      ];
+      const amount = building.getAmountCanAdd('foo');
+      assert.equal(amount, 115);
     });
   });
 });

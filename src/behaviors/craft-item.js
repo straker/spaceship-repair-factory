@@ -1,4 +1,4 @@
-import { addBehaviorToBuilding } from './utils.js';
+import Behavior from './behavior.js';
 import { deepCopy, addToStack, removeFromStack } from '../utils/index.js';
 import { MAX_CRAFT_STORAGE } from '../constants.js';
 
@@ -6,10 +6,19 @@ import { MAX_CRAFT_STORAGE } from '../constants.js';
  * Allows a building to craft an item from inputs.
  * @param {Building} building - Object the behavior applies to.
  * @param {Object} options - Behavior options.
- * @param {Number} options.speed=1 - How quickly the building can craft the item.
+ * @param {Number} options.speed=1 - How quickly (as a percent) the building can craft the item.
  */
-const craftItemBehavior = {
-  buildings: [],
+class CraftItemBehavior extends Behavior {
+  constructor() {
+    super('craftItem');
+  }
+
+  /**
+   * Allows a building to craft an item from inputs.
+   * @param {Building} building - Object the behavior applies to.
+   * @param {Object} options - Behavior options.
+   * @param {Number} options.speed=1 - How quickly (as a percent) the building can craft the item.
+   */
   add(building, options = {}) {
     // a building can only craft one item at a time, so take
     // the last craft options
@@ -18,26 +27,84 @@ const craftItemBehavior = {
       building._addItem = building.addItem.bind(building);
       building._removeItem = building.removeItem.bind(building);
       building._canAddItem = building.canAddItem.bind(building);
+      building._getItems = building.getItems.bind(building);
+      building._getAmountCanAdd = building.getAmountCanAdd.bind(building);
 
       Object.assign(building, deepCopy(craftingProperties));
-    } else {
-      building.behaviors.craftItem[0].remove();
     }
 
     // add required properties to building
     building.maxCraftStorage = options.maxCraftStorage ?? MAX_CRAFT_STORAGE;
-    addBehaviorToBuilding('craftItem', building, this, {
+    super.add(building, {
       dt: 0,
       speed: 1,
       ...options
     });
-  },
-  run(dt) {
-    this.buildings.forEach(building => {
-      building.craftItem(dt);
+  }
+
+  _behavior(building, dt) {
+    const {
+      crafting,
+      inputs,
+      outputs,
+      recipe,
+      maxCraftStorage,
+      craftFromInventory,
+      outputsToInventory,
+      _removeItem,
+      _addItem
+    } = building;
+
+    if (!recipe) {
+      return;
+    }
+
+    // start crafting if building has required inputs
+    if (!crafting) {
+      if (!building.hasRequiredInputs()) {
+        return;
+      }
+
+      building.crafting = true;
+
+      inputs.forEach((input, index) => {
+        let amount = recipe.inputs[index][1];
+        amount -= removeFromStack(input, amount, inputs, {
+          deleteStack: false
+        });
+
+        if (craftFromInventory) {
+          _removeItem(input[0], amount);
+        }
+      });
+    }
+
+    const { time } = recipe;
+    const craftItem = building.behaviors.craftItem[0];
+
+    // TODO: research can affect crafting time
+    craftItem.dt += dt * craftItem.speed;
+
+    if (craftItem.dt < time) {
+      return;
+    }
+
+    building.crafting = false;
+    craftItem.dt -= time;
+
+    recipe.outputs.forEach(([name, amount], index) => {
+      const output = outputs[index];
+      const max = amount * maxCraftStorage;
+      amount -= addToStack(output, amount, max);
+
+      if (outputsToInventory) {
+        _addItem(name, amount);
+      }
     });
   }
-};
+}
+
+const craftItemBehavior = new CraftItemBehavior();
 export default craftItemBehavior;
 
 // TODO: should also allow selecting recipe from list
@@ -118,72 +185,6 @@ const craftingProperties = {
   },
 
   /**
-   * Craft an item using the building's current recipe.
-   * @param {Number} dt- Time update.
-   */
-  craftItem(dt) {
-    const {
-      crafting,
-      inputs,
-      outputs,
-      recipe,
-      maxCraftStorage,
-      craftFromInventory,
-      outputsToInventory,
-      _removeItem,
-      _addItem
-    } = this;
-
-    if (!recipe) {
-      return;
-    }
-
-    // start crafting if building has required inputs
-    if (!crafting) {
-      if (!this.hasRequiredInputs()) {
-        return;
-      }
-
-      this.crafting = true;
-
-      inputs.forEach((input, index) => {
-        let amount = recipe.inputs[index][1];
-        amount -= removeFromStack(input, amount, inputs, {
-          deleteStack: false
-        });
-
-        if (craftFromInventory) {
-          _removeItem(input[0], amount);
-        }
-      });
-    }
-
-    const { time } = recipe;
-    const craftItem = this.behaviors.craftItem[0];
-
-    // TODO: research can affect crafting time
-    craftItem.dt += dt * craftItem.speed;
-
-    // can't craft an item twice in one update
-    if (craftItem.dt < time) {
-      return;
-    }
-
-    this.crafting = false;
-    craftItem.dt = 0;
-
-    recipe.outputs.forEach(([name, amount], index) => {
-      const output = outputs[index];
-      const max = amount * maxCraftStorage;
-      amount -= addToStack(output, amount, max);
-
-      if (outputsToInventory) {
-        _addItem(name, amount);
-      }
-    });
-  },
-
-  /**
    * Determine if building input has room for an item.
    * @param {String} item - Name of the item.
    * @return {Boolean}
@@ -252,41 +253,45 @@ const craftingProperties = {
     }
 
     return startAmount - amount;
+  },
+
+  /**
+   * Get all items in the building.
+   * @returns {(String|Number)[][]}
+   */
+  getItems() {
+    // return outputs first
+    return this.outputs.concat(this._getItems());
+  },
+
+  /**
+   * Determine how much room the building has for the item.
+   * @param {String} item - Name of the item.
+   * @return {Number} The number of items that can be added to the building.
+   */
+  getAmountCanAdd(item) {
+    const {
+      inputs,
+      recipe,
+      maxCraftStorage,
+      inputsToInventory,
+      _getAmountCanAdd
+    } = this;
+
+    let count = inputs.reduce((total, [name, count], index) => {
+      const max = recipe.inputs[index][1] * maxCraftStorage;
+
+      if (name !== item) {
+        return total;
+      }
+
+      return total + (max - count);
+    }, 0);
+
+    if (inputsToInventory) {
+      count += _getAmountCanAdd(item);
+    }
+
+    return count;
   }
 };
-
-/*
-TODO: to figure out:
-if building has both inventory and crafting inputs/outputs
-
-- how does adding items work (add to input first, then inventory?)
-
-  items will first add to inputs. if building allows (configuration setting), will add overflow to inventory
-
-- how does crafting items work (add to outputs first, then inventory?)
-
-  items will go to outputs first. if building allows (configuration setting), will add overflow to inventory
-
-- how does taking items work (take from output first, then inventory?)
-
-  items will be taken from output first, inventory second
-
-- if there are no items in inputs, does crafting draw form inventory
-
-  if building config allows it
-
-normally:
-- adding items would add to input slots if there is room
-- crafted items go to output slots (if there is room)
-- taking items takes from output slots
-
-
-RESULT:
-
-3 building config toggles when building can both craft and has inventory:
-
-- allow inserted items to overflow into inventory
-- allow crafted items to overflow into inventory
-- allow building to craft from inventory
-
-*/

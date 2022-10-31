@@ -67,6 +67,34 @@ export default class Building extends GameObject {
   }
 
   /**
+   * Determine how much room the building has for the item.
+   * @param {String} item - Name of the item.
+   * @return {Number} The number of items that can be added to the building.
+   */
+  getAmountCanAdd(item) {
+    const { inventory, inventorySlots, maxStackSize } = this;
+    const max = maxStackSize || items[item].stackSize;
+    let count = 0;
+
+    for (let i = 0; i < inventorySlots; i++) {
+      const slot = inventory[i];
+
+      if (!slot) {
+        count += max;
+        continue;
+      }
+
+      if (slot[0] !== item) {
+        continue;
+      }
+
+      count += max - slot[1];
+    }
+
+    return count;
+  }
+
+  /**
    * Add an item to the building inventory.
    * @param {String} item - Name of the item.
    * @param {Number} amount - How much to add.
@@ -143,19 +171,11 @@ export default class Building extends GameObject {
   }
 
   /**
-   * Return the last inventory item.
-   * @return {(String|Number)[]|Null}
+   * Get all items in the building.
+   * @returns {(String|Number)[][]}
    */
-  getLastItem() {
-    const { inventory, inventorySlots } = this;
-
-    for (let i = inventorySlots - 1; i >= 0; i--) {
-      const slot = inventory[i];
-
-      if (slot) {
-        return slot;
-      }
-    }
+  getItems() {
+    return this.inventory.filter(item => !!item).reverse();
   }
 }
 

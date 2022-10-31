@@ -4,14 +4,32 @@ import { items } from '../../src/data/items.js';
 import { MAX_CRAFT_STORAGE } from '../../src/constants.js';
 import craftItemBehavior from '../../src/behaviors/craft-item.js';
 
-describe('craft-item', () => {
+describe('behaviors.craft-item', () => {
   let building;
+  let max;
 
   beforeEach(() => {
     buildings.foo = {
       inventorySlots: 5,
       behaviors: []
     };
+
+    building = new Building('foo');
+    craftItemBehavior.add(building);
+
+    building?.setRecipe({
+      inputs: [
+        ['foo', 5],
+        ['fooOre', 1]
+      ],
+      outputs: [
+        ['fooBar', 1],
+        ['fooSlag', 5]
+      ],
+      time: 0.5
+    });
+    max = building?.recipe.inputs[0][1] * MAX_CRAFT_STORAGE;
+
     items.foo = {
       stackSize: 100
     };
@@ -31,9 +49,7 @@ describe('craft-item', () => {
       building.destroy();
       building = null;
     }
-  });
 
-  after(() => {
     delete buildings.foo;
     delete items.foo;
     delete items.fooOre;
@@ -63,18 +79,11 @@ describe('craft-item', () => {
         assert.equal(building.maxCraftStorage, MAX_CRAFT_STORAGE);
       });
 
-      it('should set behavior options', () => {
-        building = new Building('foo');
-        craftItemBehavior.add(building, { foo: 1, maxCraftStorage: -1 });
-        assert.equal(building.behaviors.craftItem[0].foo, 1);
-        assert.equal(building.maxCraftStorage, -1);
-      });
-
-      it('should override previous behavior when adding more than once', () => {
+      it('should only allow one', () => {
         building = new Building('foo');
         craftItemBehavior.add(building, { foo: 1 });
         craftItemBehavior.add(building, { bar: 2 });
-        assert.notExists(building.behaviors.craftItem[0].foo);
+        assert.lengthOf(building.behaviors.craftItem, 1);
         assert.equal(building.behaviors.craftItem[0].bar, 2);
       });
 
@@ -85,60 +94,218 @@ describe('craft-item', () => {
         assert.notEqual(building.addItem, building._addItem);
         assert.notEqual(building.removeItem, building._removeItem);
         assert.notEqual(building.canAddItem, building._canAddItem);
-      });
-
-      it('should add to buildings', () => {
-        building = new Building('foo');
-        craftItemBehavior.add(building);
-        assert.deepEqual(craftItemBehavior.buildings, [building]);
+        assert.notEqual(building.getItems, building._getItems);
       });
     });
 
-    describe('run', () => {
-      it('should call building craftItem', () => {
-        building = new Building('foo');
-        craftItemBehavior.add(building);
-        const spy = sinon.spy(building, 'craftItem');
-        craftItemBehavior.run(0.2);
-        assert.isTrue(spy.calledWith(0.2));
+    describe('behavior', () => {
+      it('should take from inputs', () => {
+        building.inputs = [
+          ['foo', 5],
+          ['fooOre', 1]
+        ];
+        craftItemBehavior._behavior(building, 1);
+        assert.deepEqual(building.inputs, [
+          ['foo', 0],
+          ['fooOre', 0]
+        ]);
       });
 
-      it('should call each building craftItem', () => {
-        building = new Building('foo');
-        let otherBuilding = new Building('foo');
-        craftItemBehavior.add(building);
-        craftItemBehavior.add(otherBuilding);
-        const spy1 = sinon.spy(building, 'craftItem');
-        const spy2 = sinon.spy(otherBuilding, 'craftItem');
-        craftItemBehavior.run(0.2);
-        assert.isTrue(spy1.calledWith(0.2));
-        assert.isTrue(spy2.calledWith(0.2));
+      it('should add to outputs', () => {
+        building.inputs = [
+          ['foo', 5],
+          ['fooOre', 1]
+        ];
+        craftItemBehavior._behavior(building, 1);
+        assert.deepEqual(building.outputs, [
+          ['fooBar', 1],
+          ['fooSlag', 5]
+        ]);
+      });
+
+      it('should cap outputs to recipe amount', () => {
+        building.inputs = [
+          ['foo', 5],
+          ['fooOre', 1]
+        ];
+        building.outputs = [
+          ['fooBar', MAX_CRAFT_STORAGE],
+          ['fooSlag', 5 * MAX_CRAFT_STORAGE]
+        ];
+        craftItemBehavior._behavior(building, 1);
+        assert.deepEqual(building.outputs, [
+          ['fooBar', MAX_CRAFT_STORAGE],
+          ['fooSlag', 5 * MAX_CRAFT_STORAGE]
+        ]);
+      });
+
+      it('should not add to inventory', () => {
+        building.inputs = [
+          ['foo', 5],
+          ['fooOre', 1]
+        ];
+        building.outputs = [
+          ['fooBar', MAX_CRAFT_STORAGE],
+          ['fooSlag', 5 * MAX_CRAFT_STORAGE]
+        ];
+        craftItemBehavior._behavior(building, 1);
+        assert.deepEqual(building.inventory, []);
+      });
+
+      it('should not craft item if no recipe is set', () => {
+        resetRecipe();
+        building.inputs = [
+          ['foo', 5],
+          ['fooOre', 1]
+        ];
+        craftItemBehavior._behavior(building, 1);
+        assert.deepEqual(building.outputs, []);
+      });
+
+      it('should take from inputs while crafting but not craft outputs', () => {
+        building.inputs = [
+          ['foo', 5],
+          ['fooOre', 1]
+        ];
+        craftItemBehavior._behavior(building, 0.2);
+        assert.deepEqual(building.inputs, [
+          ['foo', 0],
+          ['fooOre', 0]
+        ]);
+        assert.deepEqual(building.outputs, [
+          ['fooBar', 0],
+          ['fooSlag', 0]
+        ]);
+      });
+
+      it('should not take from inputs until crafting stops', () => {
+        building.inputs = [
+          ['foo', 10],
+          ['fooOre', 2]
+        ];
+        craftItemBehavior._behavior(building, 0.2);
+        craftItemBehavior._behavior(building, 0.2);
+        assert.deepEqual(building.inputs, [
+          ['foo', 5],
+          ['fooOre', 1]
+        ]);
+        assert.deepEqual(building.outputs, [
+          ['fooBar', 0],
+          ['fooSlag', 0]
+        ]);
+      });
+
+      it('should reset craft timer when crafting is complete', () => {
+        building.inputs = [
+          ['foo', 10],
+          ['fooOre', 2]
+        ];
+        craftItemBehavior._behavior(building, 0.75);
+        assert.equal(building.behaviors.craftItem.dt, 0);
+        assert.isFalse(building.crafting);
+      });
+
+      it('should take into account crafting speed', () => {
+        building.behaviors.craftItem[0].speed = 2;
+        building.inputs = [
+          ['foo', 5],
+          ['fooOre', 1]
+        ];
+        craftItemBehavior._behavior(building, 0.25);
+        assert.deepEqual(building.outputs, [
+          ['fooBar', 1],
+          ['fooSlag', 5]
+        ]);
+      });
+
+      describe('craftFromInventory', () => {
+        beforeEach(() => {
+          building.craftFromInventory = true;
+        });
+
+        it('should take items from inventory', () => {
+          building.inventory = [
+            ['foo', 20],
+            ['fooOre', 20]
+          ];
+          craftItemBehavior._behavior(building, 1);
+          assert.deepEqual(building.inventory, [
+            ['foo', 15],
+            ['fooOre', 19]
+          ]);
+          assert.deepEqual(building.outputs, [
+            ['fooBar', 1],
+            ['fooSlag', 5]
+          ]);
+        });
+
+        it('should take items from inputs first', () => {
+          building.inputs = [
+            ['foo', 3],
+            ['fooOre', 1]
+          ];
+          building.inventory = [
+            ['foo', 20],
+            ['fooOre', 20]
+          ];
+          craftItemBehavior._behavior(building, 1);
+          assert.deepEqual(building.inputs, [
+            ['foo', 0],
+            ['fooOre', 0]
+          ]);
+          assert.deepEqual(building.inventory, [
+            ['foo', 18],
+            ['fooOre', 20]
+          ]);
+          assert.deepEqual(building.outputs, [
+            ['fooBar', 1],
+            ['fooSlag', 5]
+          ]);
+        });
+      });
+
+      describe('outputsToInventory', () => {
+        beforeEach(() => {
+          building.outputsToInventory = true;
+        });
+
+        it('should add items to inventory', () => {
+          building.inputs = [
+            ['foo', 5],
+            ['fooOre', 1]
+          ];
+          building.outputs = [
+            ['fooBar', MAX_CRAFT_STORAGE],
+            ['fooSlag', 5 * MAX_CRAFT_STORAGE]
+          ];
+          craftItemBehavior._behavior(building, 1);
+          assert.deepEqual(building.inventory, [
+            ['fooBar', 1],
+            ['fooSlag', 5]
+          ]);
+        });
+
+        it('should add items to outputs first', () => {
+          building.inputs = [
+            ['foo', 5],
+            ['fooOre', 1]
+          ];
+          building.outputs = [
+            ['fooBar', MAX_CRAFT_STORAGE - 1],
+            ['fooSlag', 5 * MAX_CRAFT_STORAGE - 3]
+          ];
+          craftItemBehavior._behavior(building, 1);
+          assert.deepEqual(building.outputs, [
+            ['fooBar', MAX_CRAFT_STORAGE],
+            ['fooSlag', 5 * MAX_CRAFT_STORAGE]
+          ]);
+          assert.deepEqual(building.inventory, [['fooSlag', 2]]);
+        });
       });
     });
   });
 
   describe('functionality', () => {
-    let max;
-    beforeEach(() => {
-      buildings.foo = {
-        inventorySlots: 5,
-        behaviors: [['craftItem', {}]]
-      };
-      building = new Building('foo');
-      building.setRecipe({
-        inputs: [
-          ['foo', 5],
-          ['fooOre', 1]
-        ],
-        outputs: [
-          ['fooBar', 1],
-          ['fooSlag', 5]
-        ],
-        time: 0.5
-      });
-      max = building.recipe.inputs[0][1] * MAX_CRAFT_STORAGE;
-    });
-
     describe('setRecipe', () => {
       const recipe = {
         inputs: [
@@ -421,208 +588,56 @@ describe('craft-item', () => {
       });
     });
 
-    describe('behavior', () => {
-      it('should take from inputs', () => {
-        building.inputs = [
-          ['foo', 5],
-          ['fooOre', 1]
+    describe('getItems', () => {
+      it('should return all items, outputs first', () => {
+        building.inventory = [
+          ['Iron', 95],
+          undefined,
+          ['Iron Ore', 5],
+          undefined,
+          undefined
         ];
-        building.craftItem(1);
-        assert.deepEqual(building.inputs, [
-          ['foo', 0],
+        building.outputs = [['fooBar', 5]];
+        const items = building.getItems();
+        assert.deepEqual(items, [
+          ['fooBar', 5],
+          ['Iron Ore', 5],
+          ['Iron', 95]
+        ]);
+      });
+    });
+
+    describe('getAmountCanAdd', () => {
+      it('should return the total number of the item that can be added', () => {
+        building.inputs = [
+          ['foo', 3],
           ['fooOre', 0]
-        ]);
+        ];
+
+        const amount = building.getAmountCanAdd('foo');
+        assert.equal(amount, 12);
       });
 
-      it('should add to outputs', () => {
-        building.inputs = [
-          ['foo', 5],
-          ['fooOre', 1]
-        ];
-        building.craftItem(1);
-        assert.deepEqual(building.outputs, [
-          ['fooBar', 1],
-          ['fooSlag', 5]
-        ]);
-      });
-
-      it('should cap outputs to recipe amount', () => {
-        building.inputs = [
-          ['foo', 5],
-          ['fooOre', 1]
-        ];
-        building.outputs = [
-          ['fooBar', MAX_CRAFT_STORAGE],
-          ['fooSlag', 5 * MAX_CRAFT_STORAGE]
-        ];
-        building.craftItem(1);
-        assert.deepEqual(building.outputs, [
-          ['fooBar', MAX_CRAFT_STORAGE],
-          ['fooSlag', 5 * MAX_CRAFT_STORAGE]
-        ]);
-      });
-
-      it('should not add to inventory', () => {
-        building.inputs = [
-          ['foo', 5],
-          ['fooOre', 1]
-        ];
-        building.outputs = [
-          ['fooBar', MAX_CRAFT_STORAGE],
-          ['fooSlag', 5 * MAX_CRAFT_STORAGE]
-        ];
-        building.craftItem(1);
-        assert.deepEqual(building.inventory, []);
-      });
-
-      it('should not craft item if no recipe is set', () => {
-        resetRecipe();
-        building.inputs = [
-          ['foo', 5],
-          ['fooOre', 1]
-        ];
-        building.craftItem(1);
-        assert.deepEqual(building.outputs, []);
-      });
-
-      it('should take from inputs while crafting but not craft outputs', () => {
-        building.inputs = [
-          ['foo', 5],
-          ['fooOre', 1]
-        ];
-        building.craftItem(0.2);
-        assert.deepEqual(building.inputs, [
-          ['foo', 0],
-          ['fooOre', 0]
-        ]);
-        assert.deepEqual(building.outputs, [
-          ['fooBar', 0],
-          ['fooSlag', 0]
-        ]);
-      });
-
-      it('should not take from inputs until crafting stops', () => {
-        building.inputs = [
-          ['foo', 10],
-          ['fooOre', 2]
-        ];
-        building.craftItem(0.2);
-        building.craftItem(0.2);
-        assert.deepEqual(building.inputs, [
-          ['foo', 5],
-          ['fooOre', 1]
-        ]);
-        assert.deepEqual(building.outputs, [
-          ['fooBar', 0],
-          ['fooSlag', 0]
-        ]);
-      });
-
-      it('should reset craft timer when crafting is complete', () => {
-        building.inputs = [
-          ['foo', 10],
-          ['fooOre', 2]
-        ];
-        building.craftItem(0.75);
-        assert.equal(building.behaviors.craftItem.dt, 0);
-        assert.isFalse(building.crafting);
-      });
-
-      it('should take into account crafting speed', () => {
-        building.behaviors.craftItem[0].speed = 2;
-        building.inputs = [
-          ['foo', 5],
-          ['fooOre', 1]
-        ];
-        building.craftItem(0.25);
-        assert.deepEqual(building.outputs, [
-          ['fooBar', 1],
-          ['fooSlag', 5]
-        ]);
-      });
-
-      describe('craftFromInventory', () => {
+      describe('inputsToInventory', () => {
         beforeEach(() => {
-          building.craftFromInventory = true;
+          building.inputsToInventory = true;
         });
 
-        it('should take items from inventory', () => {
-          building.inventory = [
-            ['foo', 20],
-            ['fooOre', 20]
-          ];
-          building.craftItem(1);
-          assert.deepEqual(building.inventory, [
-            ['foo', 15],
-            ['fooOre', 19]
-          ]);
-          assert.deepEqual(building.outputs, [
-            ['fooBar', 1],
-            ['fooSlag', 5]
-          ]);
-        });
-
-        it('should take items from inputs first', () => {
+        it('should include inventory', () => {
           building.inputs = [
             ['foo', 3],
-            ['fooOre', 1]
+            ['fooOre', 0]
           ];
           building.inventory = [
-            ['foo', 20],
-            ['fooOre', 20]
+            ['Iron', 95],
+            undefined,
+            ['Iron Ore', 5],
+            undefined,
+            undefined
           ];
-          building.craftItem(1);
-          assert.deepEqual(building.inputs, [
-            ['foo', 0],
-            ['fooOre', 0]
-          ]);
-          assert.deepEqual(building.inventory, [
-            ['foo', 18],
-            ['fooOre', 20]
-          ]);
-          assert.deepEqual(building.outputs, [
-            ['fooBar', 1],
-            ['fooSlag', 5]
-          ]);
-        });
-      });
 
-      describe('outputsToInventory', () => {
-        beforeEach(() => {
-          building.outputsToInventory = true;
-        });
-
-        it('should add items to inventory', () => {
-          building.inputs = [
-            ['foo', 5],
-            ['fooOre', 1]
-          ];
-          building.outputs = [
-            ['fooBar', MAX_CRAFT_STORAGE],
-            ['fooSlag', 5 * MAX_CRAFT_STORAGE]
-          ];
-          building.craftItem(1);
-          assert.deepEqual(building.inventory, [
-            ['fooBar', 1],
-            ['fooSlag', 5]
-          ]);
-        });
-
-        it('should add items to outputs first', () => {
-          building.inputs = [
-            ['foo', 5],
-            ['fooOre', 1]
-          ];
-          building.outputs = [
-            ['fooBar', MAX_CRAFT_STORAGE - 1],
-            ['fooSlag', 5 * MAX_CRAFT_STORAGE - 3]
-          ];
-          building.craftItem(1);
-          assert.deepEqual(building.outputs, [
-            ['fooBar', MAX_CRAFT_STORAGE],
-            ['fooSlag', 5 * MAX_CRAFT_STORAGE]
-          ]);
-          assert.deepEqual(building.inventory, [['fooSlag', 2]]);
+          const amount = building.getAmountCanAdd('foo');
+          assert.equal(amount, 312);
         });
       });
     });
