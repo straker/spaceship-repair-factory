@@ -82,6 +82,15 @@ const grid = {
 
   render() {
     this.objects.forEach(obj => obj.render());
+  },
+
+  _reset() {
+    for (let row = 0; row < rows; row++) {
+      tiles[row] = [];
+      for (let col = 0; col < cols; col++) {
+        tiles[row][col] = [];
+      }
+    }
   }
 };
 

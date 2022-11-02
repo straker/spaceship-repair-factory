@@ -20,6 +20,7 @@ export default class Building extends GameObject {
       ...properties,
       _name: name,
       type: TYPES.building + (TYPES[type] ? TYPES[type] : 0),
+      behaviors: {},
       behaviorsConfig: behaviors,
 
       /**

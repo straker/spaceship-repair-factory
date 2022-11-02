@@ -8,9 +8,6 @@ export default class GameObject extends SpriteClass {
     // }
 
     properties.dir = DIRS[properties.rotation ?? 0];
-    properties.behaviors = {};
-    properties.inputs = [];
-    properties.inventory = [];
 
     if (properties.x !== undefined) {
       properties.row = (properties.y / GRID_SIZE) | 0;
@@ -31,9 +28,5 @@ export default class GameObject extends SpriteClass {
     this._rot = value;
     this.dir = DIRS[value];
     this._pc();
-  }
-
-  canTakeComponent() {
-    return false;
   }
 }

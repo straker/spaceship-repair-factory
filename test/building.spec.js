@@ -1,6 +1,8 @@
 import Building from '../src/building.js';
 import { buildings } from '../src/data/buildings.js';
 import { items } from '../src/data/items.js';
+import { TYPES, GRID_SIZE } from '../src/constants.js';
+import grid from '../src/utils/grid.js';
 
 describe('building', () => {
   let building;
@@ -12,15 +14,84 @@ describe('building', () => {
     items.foo = {
       stackSize: 100
     };
+    TYPES.foo = 4;
     building = new Building('foo');
   });
 
   after(() => {
     delete buildings.foo;
     delete items.foo;
+    delete TYPES.foo;
   });
 
-  // TODO: incomplete, need more tests for constructor and destroy
+  describe('constructor', () => {
+    it('should set default props', () => {
+      assert.equal(building._name, 'foo');
+      assert.lengthOf(building.inventory, 0);
+      assert.deepEqual(building.behaviors, {});
+    });
+
+    it('should set type', () => {
+      assert.equal(building.type, TYPES.building);
+    });
+
+    it('should set type as bitmask', () => {
+      buildings.foo.type = 'foo';
+      building = new Building('foo');
+      assert.equal(building.type, TYPES.building + 4);
+    });
+
+    it('should set props from buildings', () => {
+      assert.equal(building.inventorySlots, 5);
+    });
+
+    it('should set props from constructor', () => {
+      building = new Building('foo', { thing: 1 });
+      assert.equal(building.thing, 1);
+    });
+
+    it('should set behaviors', () => {
+      buildings.foo.behaviors = [['takeItem', { foo: 1 }]];
+      building = new Building('foo');
+      assert.deepEqual(building.behaviorsConfig, [['takeItem', { foo: 1 }]]);
+    });
+
+    it('should give building behaviors', () => {
+      buildings.foo.behaviors = [['takeItem', { foo: 1 }]];
+      building = new Building('foo');
+      assert.exists(building.behaviors.takeItem);
+    });
+
+    it('should add to grid', () => {
+      building = new Building('foo', {
+        row: 5,
+        col: 5,
+        width: GRID_SIZE,
+        height: GRID_SIZE
+      });
+      assert.deepEqual(grid.get(building), [building]);
+    });
+  });
+
+  describe('destroy', () => {
+    it('should remove all behaviors', () => {
+      buildings.foo.behaviors = [['takeItem', { foo: 1 }]];
+      building = new Building('foo');
+      building.destroy();
+      assert.deepEqual(building.behaviors.takeItem, []);
+    });
+
+    it('should remove from grid', () => {
+      building = new Building('foo', {
+        row: 5,
+        col: 5,
+        width: GRID_SIZE,
+        height: GRID_SIZE
+      });
+      building.destroy();
+      assert.deepEqual(grid.get(building), []);
+    });
+  });
 
   describe('addItem', () => {
     describe('when stack does not exist', () => {
