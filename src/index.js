@@ -6,12 +6,14 @@ import { behaviors } from './behaviors/index.js';
 
 async function main() {
   await init();
-  transportManager.canPlace();
+  transportManager.canPlace({}, []);
 
   GameLoop({
     update(dt) {
       behaviors.spawnItem.run(dt);
-      behaviors.takeAndMoveItem.run(dt);
+      behaviors.takeItem.run(dt);
+      behaviors.putItem.run(dt);
+      behaviors.craftItem.run(dt);
       grid.update();
     },
     render() {

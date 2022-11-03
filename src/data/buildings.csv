@@ -1,7 +1,8 @@
-,Type,Inventory slots,max items,Image,Behavior,Options
+,Type,Inventory slots,max stack size,Image,Behavior,Options
 Extractor I,,,,,,
 Belt I,transport,1,1,/src/assets/belt-I.png,,
 Assembler I,,,,/src/assets/assembler-I.png,craftItem,
-Storage,,12,,/src/assets/storage.png,spawnItem,"{""item"": ""Iron Ore"", ""amount"": 1, ""rate"": 1}"
-,,,,,spawnItem,"{""item"": ""Iron"", ""amount"": 1, ""rate"": 1}"
-Arm,,1,,/src/assets/arm.png,takeAndMoveItem,"{""amount"": 1, ""rate"": 0.5}"
+Storage,,12,,/src/assets/storage.png,spawnItem,"{""item"": ""Nickel"", ""amount"": 1, ""rate"": 1}"
+,,,,,,
+Arm,,1,,/src/assets/arm.png,takeItem,"{""amount"": 1, ""rate"": 1}"
+,,,,,putItem,"{""amount"": 1, ""rate"": 1}"

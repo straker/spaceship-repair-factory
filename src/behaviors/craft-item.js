@@ -31,6 +31,14 @@ class CraftItemBehavior extends Behavior {
       building._getAmountCanAdd = building.getAmountCanAdd.bind(building);
 
       Object.assign(building, deepCopy(craftingProperties));
+      Object.defineProperty(building, 'recipe', {
+        get() {
+          return this._recipe;
+        },
+        set(recipe) {
+          this.setRecipe(recipe);
+        }
+      });
     }
 
     // add required properties to building
@@ -112,7 +120,7 @@ export default craftItemBehavior;
 const craftingProperties = {
   inputs: [],
   outputs: [],
-  recipe: null,
+  _recipe: null,
   crafting: false,
 
   // these settings only appear when a building has both
@@ -135,7 +143,7 @@ const craftingProperties = {
     this.inputs = [];
     this.outputs = [];
 
-    this.recipe = recipe;
+    this._recipe = recipe;
     recipe.inputs.forEach(([name], index) => {
       this.inputs[index] = [name, 0];
     });

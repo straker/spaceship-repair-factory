@@ -19,10 +19,8 @@ describe('behaviors.take-item', () => {
   });
 
   afterEach(() => {
-    if (building) {
-      building.destroy();
-      building = null;
-    }
+    building?.destroy();
+    building = null;
   });
 
   after(() => {

@@ -14,6 +14,7 @@ export default class Behavior {
    */
   add(building, options = {}) {
     const { name, buildings } = this;
+    const _this = this;
 
     if (!building.behaviors[name]) {
       building.behaviors[name] = [];
@@ -30,15 +31,20 @@ export default class Behavior {
        * Remove the behavior from the building.
        */
       remove() {
-        removeFromArray(buildingBehaviors, behaviorOptions);
-
-        if (buildingBehaviors.length === 0) {
-          removeFromArray(buildings, building);
-        }
+        _this._remove(building, behaviorOptions);
       }
     };
 
     buildingBehaviors.push(behaviorOptions);
+  }
+
+  _remove(building, behavior) {
+    const { name, buildings } = this;
+    removeFromArray(building.behaviors[name], behavior);
+
+    if (building.behaviors[name].length === 0) {
+      removeFromArray(buildings, building);
+    }
   }
 
   /**

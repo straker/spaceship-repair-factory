@@ -13,16 +13,11 @@ describe('behavior', () => {
   });
 
   afterEach(() => {
-    if (building) {
-      building.destroy();
-      building = null;
-    }
+    building?.destroy();
+    building = null;
 
     behavior.buildings = [];
-
-    if (behavior._behavior.restore) {
-      behavior._behavior.restore();
-    }
+    behavior._behavior.restore?.();
 
     delete buildings.foo;
   });
@@ -104,6 +99,8 @@ describe('behavior', () => {
       assert.lengthOf(behavior.buildings, 1);
     });
   });
+
+  describe('remove', () => {});
 
   describe('run', () => {
     it('should call the behavior for a building', () => {

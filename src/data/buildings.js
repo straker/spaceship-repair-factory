@@ -23,7 +23,7 @@ export async function initBuildings() {
       const behaviorOptions = cells[6] ? JSON.parse(cells[6]) : {};
 
       // use last entry to add multiple behaviors to a building
-      if (!name) {
+      if (!name && behavior) {
         lastEntry.behaviors.push([behavior, behaviorOptions]);
         return;
       }

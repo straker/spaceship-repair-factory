@@ -21,11 +21,11 @@ export const config = {
           time: 1,
           inputs: [['Iron', 5]],
           output: [['foobar', 1]]
-        },
-        Wire: {
-          time: 1,
-          outputs: [['Nickel', 3]]
         }
+        // Wire: {
+        //   time: 1,
+        //   outputs: [['Nickel', 3]]
+        // }
       },
       translations: {
         en: {

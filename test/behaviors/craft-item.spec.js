@@ -45,10 +45,8 @@ describe('behaviors.craft-item', () => {
   });
 
   afterEach(() => {
-    if (building) {
-      building.destroy();
-      building = null;
-    }
+    building?.destroy();
+    building = null;
 
     delete buildings.foo;
     delete items.foo;
@@ -58,7 +56,7 @@ describe('behaviors.craft-item', () => {
   });
 
   function resetRecipe() {
-    building.recipe = null;
+    building._recipe = null;
     building.inputs = [];
     building.outputs = [];
   }
@@ -95,6 +93,25 @@ describe('behaviors.craft-item', () => {
         assert.notEqual(building.removeItem, building._removeItem);
         assert.notEqual(building.canAddItem, building._canAddItem);
         assert.notEqual(building.getItems, building._getItems);
+      });
+
+      it('should set recipe correctly', () => {
+        building = new Building('foo');
+        craftItemBehavior.add(building);
+        const spy = sinon.spy(building, 'setRecipe');
+        const recipe = {
+          inputs: [
+            ['foo', 5],
+            ['fooOre', 1]
+          ],
+          outputs: [
+            ['fooBar', 1],
+            ['fooSlag', 5]
+          ],
+          time: 0.5
+        };
+        building.recipe = recipe;
+        assert.isTrue(spy.calledWith(recipe));
       });
     });
 
