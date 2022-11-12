@@ -1,4 +1,5 @@
 import GameObject from './utils/game-object.js';
+import { radToDeg } from './libs/kontra.js';
 import { i18n } from './data/translations.js';
 import { buildings } from './data/buildings.js';
 import { items } from './data/items.js';
@@ -19,6 +20,7 @@ export default class Building extends GameObject {
       ...props,
       ...properties,
       _name: name,
+      facing: properties.facing || properties.rotation || 0,
       type: TYPES.building + (TYPES[type] ? TYPES[type] : 0),
       behaviors: {},
       behaviorsConfig: behaviors,
@@ -34,12 +36,28 @@ export default class Building extends GameObject {
       giveBehavior(name, this, options);
     });
     grid.add(this);
+
+    if (this.animations) {
+      this.playAnimation(radToDeg(this.facing));
+    }
   }
 
   get name() {
     return i18n(this._name);
   }
 
+  // do not allow setting rotation so we don't rotate the
+  // buildings
+  set rotation(value) {
+    return;
+  }
+  get rotation() {
+    return 0;
+  }
+
+  /**
+   * Clean up the building and behaviors.
+   */
   destroy() {
     Object.values(this.behaviors).forEach(behaviors => {
       behaviors.forEach(behavior => behavior.remove());

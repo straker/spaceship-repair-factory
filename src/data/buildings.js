@@ -1,7 +1,8 @@
-import { loadData, loadImage } from '../libs/kontra.js';
+import { loadData, loadImage, SpriteSheet } from '../libs/kontra.js';
 import { CSV } from '../libs/csv.js';
 import { config } from './config.js';
 import { addModChanges } from '../utils/index.js';
+import { GRID_SIZE } from '../constants.js';
 
 export const buildings = {};
 
@@ -9,18 +10,19 @@ export async function initBuildings() {
   const data = await loadData('/src/data/buildings.csv');
   let lastEntry;
 
-  CSV.parse(data)
+  const promies = CSV.parse(data)
     .filter((line, index) => index !== 0)
     // remove empty lines
     .filter(line => line.some(cell => !!cell))
-    .forEach(cells => {
+    .map(async cells => {
       const name = cells[0];
       const type = cells[1];
       const inventorySlots = cells[2];
       const maxStackSize = cells[3];
-      const image = cells[4];
-      const behavior = cells[5];
-      const behaviorOptions = cells[6] ? JSON.parse(cells[6]) : {};
+      const image = cells[4] ? await loadImage(cells[4]) : undefined;
+      const animations = cells[5] ? JSON.parse(cells[5]) : false;
+      const behavior = cells[6];
+      const behaviorOptions = cells[7] ? JSON.parse(cells[7]) : {};
 
       // use last entry to add multiple behaviors to a building
       if (!name && behavior) {
@@ -33,12 +35,25 @@ export async function initBuildings() {
         type,
         inventorySlots,
         maxStackSize,
-        image,
         behaviors: behavior ? [[behavior, behaviorOptions]] : []
       });
 
+      if (animations) {
+        const sheet = SpriteSheet({
+          image,
+          frameWidth: GRID_SIZE,
+          frameHeight: GRID_SIZE,
+          animations
+        });
+        building.animations = sheet.animations;
+      } else {
+        buildings.image = image;
+      }
+
       lastEntry = building;
     });
+
+  await Promise.all(promies);
 
   // buildings need to give a cost, as well as list behaviors,
   // actions, and properties

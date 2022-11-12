@@ -2,12 +2,14 @@ import craftItemBehavior from './craft-item.js';
 import spawnItemBehavior from './spawn-item.js';
 import takeItemBehavior from './take-item.js';
 import putItemBehavior from './put-item.js';
+import transportItemBehavior from './transport-item.js';
 
 export const behaviors = {
   craftItem: craftItemBehavior,
   spawnItem: spawnItemBehavior,
   takeItem: takeItemBehavior,
-  putItem: putItemBehavior
+  putItem: putItemBehavior,
+  transportItem: transportItemBehavior
 };
 
 /**

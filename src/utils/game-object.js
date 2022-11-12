@@ -3,11 +3,11 @@ import { DIRS, GRID_SIZE } from '../constants.js';
 
 export default class GameObject extends SpriteClass {
   constructor(properties = {}) {
-    // if (!properties.anchor) {
-    //   properties.anchor = { x: 0.5, y: 0.5 };
-    // }
+    if (!properties.anchor) {
+      properties.anchor = { x: 0.5, y: 0.5 };
+    }
 
-    properties.dir = DIRS[properties.rotation ?? 0];
+    properties.dir = DIRS[properties.facing ?? 0];
 
     if (properties.x !== undefined) {
       properties.row = (properties.y / GRID_SIZE) | 0;
@@ -18,15 +18,5 @@ export default class GameObject extends SpriteClass {
     }
 
     super(properties);
-  }
-
-  get rotation() {
-    return this._rot;
-  }
-
-  set rotation(value) {
-    this._rot = value;
-    this.dir = DIRS[value];
-    this._pc();
   }
 }

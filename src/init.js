@@ -7,7 +7,7 @@ import { setLang } from './data/translations.js';
 
 // init first so all other files have canvas / context
 // available at top-level
-initKontra();
+const { canvas, context } = initKontra();
 
 export default async function init() {
   initInput();
@@ -17,4 +17,5 @@ export default async function init() {
   await initItems();
   await initBuildings();
   await initTasks();
+  return { canvas, context };
 }

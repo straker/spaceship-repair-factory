@@ -1,5 +1,6 @@
 const canvas = document.querySelector('canvas');
 export const GRID_SIZE = 32;
+export const ITEM_SIZE = GRID_SIZE / 2;
 export const GAME_WIDTH = canvas.width;
 export const GAME_HEIGHT = canvas.height;
 
