@@ -18,7 +18,13 @@ export default class Item extends GameObject {
     properties.margin = 2;
     properties.width = ITEM_SIZE;
     properties.height = ITEM_SIZE;
-    properties.color = name === 'Iron' ? 'purple' : 'red';
+    properties.color = name === 'Nickel'
+      ? 'purple'
+      : name === 'Copper'
+      ? 'red'
+      : name === 'Wire'
+      ? 'yellow'
+      : 'blue';
     properties.id = ++id;
     properties.render = function () {
       const { context, color, width, height } = this;

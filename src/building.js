@@ -9,7 +9,7 @@ import { giveBehavior } from './behaviors/index.js';
 import grid from './utils/grid.js';
 
 export default class Building extends GameObject {
-  constructor(name, properties) {
+  constructor(name, properties = {}) {
     const { type, behaviors, ...props } = buildings[name];
 
     if (!TYPES[type]) {
@@ -24,6 +24,7 @@ export default class Building extends GameObject {
       type: TYPES.building + (TYPES[type] ? TYPES[type] : 0),
       behaviors: {},
       behaviorsConfig: behaviors,
+      anchor: { x: 0, y: 0 },
 
       /**
        * @property {(String|Number)[][]} inventory - Array of items in the inventory in the format of [ItemName, Quantity].

@@ -69,7 +69,10 @@ class CraftItemBehavior extends Behavior {
 
     // start crafting if building has required inputs
     if (!crafting) {
-      if (!building.hasRequiredInputs()) {
+      if (
+        !building.hasRequiredInputs() ||
+        outputs.some((output, index) => output[1] >= recipe.outputs[index][1] * maxCraftStorage)
+      ) {
         return;
       }
 

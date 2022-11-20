@@ -236,6 +236,29 @@ const transportProperties = {
     return 1;
   },
 
+  removeItem(item) {
+    const { inventory, inventorySlots } = this;
+
+    for (let i = inventorySlots - 1; i >= 0; i--) {
+      const stack = inventory[i];
+
+      if (!stack) {
+        continue;
+      }
+
+      const [name] = stack;
+
+      if (name !== item) {
+        continue;
+      }
+
+      stack.destroy();
+      inventory[i] = undefined;
+
+      return 1;
+    }
+  },
+
   getStartPosition() {
     const x =
       this.col * GRID_SIZE +

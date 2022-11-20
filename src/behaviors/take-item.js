@@ -34,8 +34,6 @@ class TakeItemBehavior extends Behavior {
       return;
     }
 
-    takeItem.dt -= rate;
-
     const fromBuilding = grid.getByType(
       getPrevPos(building, dir),
       TYPES.building
@@ -60,6 +58,7 @@ class TakeItemBehavior extends Behavior {
       const numToTake = Math.min(building.getAmountCanAdd(item), amount);
       const numTaken = fromBuilding.removeItem(item, numToTake);
       building.addItem(item, numTaken);
+      takeItem.dt = 0;
       return;
     }
   }

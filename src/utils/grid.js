@@ -27,25 +27,30 @@ function forEachTile([startRow, startCol, endRow, endCol], cb) {
   }
 }
 
+function getDimensions(obj) {
+  return [
+    obj.row,
+    obj.col,
+    // subtract 1 since a 32x32 obj should occupy one tile
+    // not two (32 / 32 = 1)
+    obj.row + toGrid(obj.height - 1),
+    obj.col + toGrid(obj.width - 1)
+  ];
+}
+
 const grid = {
   objects,
 
   add(obj) {
-    // always add from the bottom-right corner
-    // subtract 1 since a 32x32 obj should occupy one tile
-    // not two (32 / 32 = 1)
-    let startRow = obj.row - toGrid(obj.height - 1);
-    let startCol = obj.col - toGrid(obj.width - 1);
-
-    forEachTile([startRow, startCol, obj.row, obj.col], tile => tile.push(obj));
+    forEachTile(getDimensions(obj), tile => tile.push(obj));
     objects.push(obj);
   },
 
   remove(obj) {
-    let startRow = obj.row - toGrid(obj.height - 1);
-    let startCol = obj.col - toGrid(obj.width - 1);
+    let startRow = obj.row + toGrid(obj.height - 1);
+    let startCol = obj.col + toGrid(obj.width - 1);
 
-    forEachTile([startRow, startCol, obj.row, obj.col], tile => {
+    forEachTile(getDimensions(obj), tile => {
       removeFromArray(tile, obj);
     });
 
@@ -53,9 +58,9 @@ const grid = {
   },
 
   get(pos) {
-    let row = pos.row ?? (pos.y / GRID_SIZE) | 0;
-    let col = pos.col ?? (pos.x / GRID_SIZE) | 0;
-    return tiles[row] && tiles[row][col] ? tiles[row][col] : [];
+    let row = pos.row ?? toGrid(pos.y);
+    let col = pos.col ?? toGrid(pos.x);
+    return tiles[row]?.[col] ?? [];
   },
 
   getByType(pos, type) {
@@ -64,10 +69,7 @@ const grid = {
 
   getAll(obj) {
     let objs = [];
-    let startRow = obj.row - toGrid(obj.height - 1);
-    let startCol = obj.col - toGrid(obj.width - 1);
-
-    forEachTile([startRow, startCol, obj.row, obj.col], tile =>
+    forEachTile(getDimensions(obj), tile =>
       objs.push(...tile)
     );
 
