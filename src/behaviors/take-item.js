@@ -1,6 +1,6 @@
 import Behavior from './behavior.js';
 import grid from '../utils/grid.js';
-import { getPrevPos } from '../utils/index.js';
+import { getPrevPos, getNextPos } from '../utils/index.js';
 import { TYPES } from '../constants.js';
 
 class TakeItemBehavior extends Behavior {
@@ -16,7 +16,7 @@ class TakeItemBehavior extends Behavior {
    * @param {Number} options.rate - How often (in seconds) to take the item.
    */
   add(building, options = {}) {
-    super.add(building, {
+    return super.add(building, {
       dt: 0,
       ...options
     });
@@ -25,14 +25,7 @@ class TakeItemBehavior extends Behavior {
   _behavior(building, dt) {
     const { dir } = building;
     const takeItem = building.behaviors.takeItem[0];
-    const { amount, rate } = takeItem;
-
-    // TODO: research can affect move time
-    takeItem.dt += dt;
-
-    if (takeItem.dt < rate) {
-      return;
-    }
+    const { amount, rate, cooldown, animation } = takeItem;
 
     const fromBuilding = grid.getByType(
       getPrevPos(building, dir),
@@ -41,6 +34,11 @@ class TakeItemBehavior extends Behavior {
     if (!fromBuilding) {
       return;
     }
+
+    const toBuilding = grid.getByType(
+      getNextPos(building, dir),
+      TYPES.building
+    )[0];
 
     const items = fromBuilding.getItems();
     if (!items) {
@@ -55,10 +53,22 @@ class TakeItemBehavior extends Behavior {
         continue;
       }
 
+      // make the behavior smart by not taking items that the
+      // building to place into does not accept
+      if (building.behaviors.putItem.length && !toBuilding.canAddItem(item)) {
+        continue;
+      }
+
       const numToTake = Math.min(building.getAmountCanAdd(item), amount);
       const numTaken = fromBuilding.removeItem(item, numToTake);
       building.addItem(item, numTaken);
-      takeItem.dt = 0;
+
+      // TODO: research can affect move time
+      building.behaviors.shared[0].cooldown = rate;
+
+      if (animation) {
+        building.playAnimation('takeItem');
+      }
       return;
     }
   }

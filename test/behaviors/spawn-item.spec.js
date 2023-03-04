@@ -31,9 +31,11 @@ describe('behaviors.spawn-item', () => {
   });
 
   describe('behavior', () => {
+    let behavior;
+
     beforeEach(() => {
       building = new Building('foo');
-      spawnItemBehavior.add(building, { item: 'Iron', rate: 1, amount: 1 });
+      behavior = spawnItemBehavior.add(building, { item: 'Iron', rate: 1, amount: 1 });
     });
 
     it('should add item to inventory', () => {
@@ -58,6 +60,13 @@ describe('behaviors.spawn-item', () => {
         ['Iron', 1],
         ['Iron Ore', 1]
       ]);
+    });
+
+    it('should not add item when no item is selected', () => {
+      behavior.remove();
+      spawnItemBehavior.add(building, { rate: 1, amount: 1 });
+      spawnItemBehavior._behavior(building, 1);
+      assert.deepEqual(building.inventory, []);
     });
   });
 });

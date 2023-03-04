@@ -1,9 +1,9 @@
 import GameObject from './utils/game-object.js';
-import { radToDeg } from './libs/kontra.js';
+import { radToDeg, SpriteSheet } from './libs/kontra.js';
 import { i18n } from './data/translations.js';
 import { buildings } from './data/buildings.js';
 import { items } from './data/items.js';
-import { TYPES } from './constants.js';
+import { GRID_SIZE, TYPES } from './constants.js';
 import { addToStack, removeFromStack } from './utils/index.js';
 import { giveBehavior } from './behaviors/index.js';
 import grid from './utils/grid.js';
@@ -33,12 +33,31 @@ export default class Building extends GameObject {
     };
 
     super(properties);
+
     behaviors.forEach(([name, options]) => {
       giveBehavior(name, this, options);
+
+      if (options.animation) {
+        this._spriteSheet = this._spriteSheet ?? SpriteSheet({
+          image: this.image,
+          frameWidth: GRID_SIZE,
+          frameHeight: GRID_SIZE
+        });
+        this.image = null;
+        this.width = null;
+        this.height = null;
+        this._spriteSheet.createAnimations({
+          [name]: options.animation
+        });
+        this.animations = this._spriteSheet.animations;
+      }
     });
+    // give every building the shared behavior
+    giveBehavior('shared', this);
     grid.add(this);
 
-    if (this.animations) {
+    // auto-play directional animations
+    if (this.animations && this.animations[radToDeg(this.facing)]) {
       this.playAnimation(radToDeg(this.facing));
     }
   }

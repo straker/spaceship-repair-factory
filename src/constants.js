@@ -15,6 +15,18 @@ export const TYPES = {
   assembler: 8
 };
 
+export let COLORS = {
+  white: '#cfc6b8',
+  black: '#333333',
+  grey: '#777777',
+  red: '#e6482e',
+  yellow: '#f4b41b',
+  green: '#38d973',
+  blue: '#3cacd7',
+  brown: '#bf7958',
+  purple: '#472d3c'
+};
+
 // dir values by name, degree, and radian
 const right = { row: 0, col: 1 };
 const down = { row: 1, col: 0 };
@@ -32,4 +44,10 @@ export let DIRS = {
   up,
   [Math.PI * 1.5]: up,
   270: up
+};
+
+export const TEXT_PROPS = {
+  font: `${GRID_SIZE}px Arial`,
+  color: COLORS.white,
+  anchor: { x: 0, y: 0.5 }
 };

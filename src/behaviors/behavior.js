@@ -36,6 +36,7 @@ export default class Behavior {
     };
 
     buildingBehaviors.push(behaviorOptions);
+    return behaviorOptions;
   }
 
   _remove(building, behavior) {
@@ -53,6 +54,10 @@ export default class Behavior {
    */
   run(dt) {
     this.buildings.forEach(building => {
+      if (building.behaviors.shared[0].cooldown) {
+        return;
+      }
+
       this._behavior(building, dt);
     });
   }

@@ -43,7 +43,7 @@ class CraftItemBehavior extends Behavior {
 
     // add required properties to building
     building.maxCraftStorage = options.maxCraftStorage ?? MAX_CRAFT_STORAGE;
-    super.add(building, {
+    return super.add(building, {
       dt: 0,
       speed: 1,
       ...options

@@ -1,17 +1,29 @@
 import init from './init.js';
-import { GameLoop } from './libs/kontra.js';
+import { GameLoop, imageAssets } from './libs/kontra.js';
 import grid from './utils/grid.js';
-import { behaviors } from './behaviors/index.js';
+import { behaviors, giveBehavior } from './behaviors/index.js';
 import { GRID_SIZE } from './constants.js';
 import Building from './building.js';
 import { _items } from './item.js';
+import ImageButton from './ui/image-button.js';
+import buildingPopup from './ui/building-popup.js';
 
 async function main() {
   const { canvas, context } = await init();
 
+  // const imgBtn = new ImageButton({
+  //   x: 100,
+  //   y: 100,
+  //   width: GRID_SIZE,
+  //   height: GRID_SIZE,
+  //   image: imageAssets['/src/assets/arm'],
+  //   onDown() {}
+  // });
+
   GameLoop({
     // fps: 15,
     update(dt) {
+      behaviors.shared.run(dt);
       behaviors.spawnItem.run(dt);
       behaviors.takeItem.run(dt);
       behaviors.putItem.run(dt);
@@ -19,10 +31,13 @@ async function main() {
       behaviors.transportItem.run(dt);
       grid.update();
       _items.forEach(item => item.update());
+      // buildingPopup.update();
     },
     render() {
       grid.render();
       _items.forEach(item => item.render());
+      // imgBtn.render();
+      // buildingPopup.render();
 
       if (window.DEBUG) {
         context.strokeStyle = 'grey';
@@ -40,210 +55,258 @@ async function main() {
       }
     }
   }).start();
-  // window.DEBUG=true
-  window.belt = new Building('Belt I', {
-    id: 1,
-    col: 6,
-    row: 4
-  });
-  window.belt2 = new Building('Belt I', {
-    id: 2,
-    col: 7,
-    row: 4
-  });
-  window.belt3 = new Building('Belt I', {
-    id: 3,
-    col: 8,
-    row: 4
-  });
-  window.belt4 = new Building('Belt I', {
-    id: 4,
-    col: 9,
-    row: 1,
-    rotation: Math.PI / 2
-  });
-  window.belt5 = new Building('Belt I', {
-    id: 5,
-    col: 9,
-    row: 2,
-    rotation: Math.PI / 2
-  });
-  window.belt6 = new Building('Belt I', {
-    id: 6,
-    col: 9,
-    row: 3,
-    rotation: Math.PI / 2
-  });
-  window.belt7 = new Building('Belt I', {
-    id: 7,
-    col: 9,
-    row: 4,
-    rotation: Math.PI / 2
-  });
-  window.belt8 = new Building('Belt I', {
-    id: 8,
-    col: 9,
-    row: 5,
-    rotation: Math.PI / 2
-  });
-  window.belt9 = new Building('Belt I', {
-    id: 9,
-    col: 9,
-    row: 0,
-    rotation: Math.PI / 2
-  });
-  window.belt18 = new Building('Belt I', {
-    id: 18,
-    col: 5,
-    row: 6
-  });
-  window.belt17 = new Building('Belt I', {
-    id: 17,
-    col: 6,
-    row: 6
-  });
-  window.belt10 = new Building('Belt I', {
-    id: 10,
-    col: 7,
-    row: 6
-  });
-  window.belt11 = new Building('Belt I', {
-    id: 11,
-    col: 8,
-    row: 6
-  });
-  window.belt12 = new Building('Belt I', {
-    id: 12,
-    col: 9,
-    row: 6
-  });
-  window.belt13 = new Building('Belt I', {
-    id: 13,
-    col: 10,
-    row: 6
-  });
-  window.belt14 = new Building('Belt I', {
-    id: 14,
-    col: 11,
-    row: 6
-  });
-  window.belt15 = new Building('Belt I', {
-    id: 15,
-    col: 12,
-    row: 6
-  });
-  window.belt16 = new Building('Belt I', {
-    id: 16,
-    col: 13,
-    row: 6
-  });
-  window.belt19 = new Building('Belt I', {
-    id: 19,
-    col: 14,
-    row: 6,
-    rotation: (Math.PI * 3) / 2
-  });
-  window.belt20 = new Building('Belt I', {
-    id: 20,
-    col: 14,
-    row: 5,
-    rotation: (Math.PI * 3) / 2
-  });
-  window.belt21 = new Building('Belt I', {
-    id: 21,
-    col: 14,
-    row: 4,
-    rotation: (Math.PI * 3) / 2
-  });
-  window.belt22 = new Building('Belt I', {
-    id: 22,
-    col: 14,
-    row: 3,
-    rotation: Math.PI
-  });
-  window.belt23 = new Building('Belt I', {
-    id: 23,
-    col: 13,
-    row: 3,
-    rotation: Math.PI
-  });
-  window.belt24 = new Building('Belt I', {
-    id: 24,
-    col: 12,
-    row: 3,
-    rotation: Math.PI
-  });
-  window.belt25 = new Building('Belt I', {
-    id: 25,
-    col: 11,
-    row: 3,
-    rotation: Math.PI
-  });
-  window.belt26 = new Building('Belt I', {
-    id: 26,
-    col: 10,
-    row: 3,
-    rotation: Math.PI
-  });
 
-  // window.belt.addItem('Copper');
-  // belt4.addItem('Iron')
-
-  // const item = new Item('Iron', {
-  //   count: 1,
-  // });
-  // belt4.inventory[1] = item;
-  // belt4.setItemPosition(item, 1)
-  // belt5.addItem('Iron')
-  // belt9.addItem('Iron')
-  // belt17.addItem('Iron')
-  // const item2 = new Item('Iron', {
-  //   count: 1,
-  // });
-  // belt17.inventory[1] = item2;
-  // belt17.setItemPosition(item2, 1)
-  // belt18.addItem('Iron')
-  // const item3 = new Item('Iron', {
-  //   count: 1,
-  // });
-  // belt18.inventory[1] = item3;
-  // belt18.setItemPosition(item3, 1)
-  // behaviors.spawnItem.add(belt18, {
-  //   item: 'Iron',
-  //   amount: 1,
-  //   rate: 2
-  // });
-
+  const buildings = [];
+  const length = 5;
+  for (let i = 0; i < length; i++) {
+    buildings.push(new Building('Belt I', {
+      id: 1,
+      col: 6+i,
+      row: 4
+    }));
+    buildings.push(new Building('Belt I', {
+      id: 1,
+      col: 6+length+5+i,
+      row: 4
+    }));
+  }
   window.arm = new Building('Arm', {
-    col: 4,
-    row: 6
-  });
-  window.storage = new Building('Storage', {
-    col: 3,
-    row: 6
-  });
-  window.arm2 = new Building('Arm', {
-    col: 15,
-    row: 6
+    col: 6+length,
+    row: 4
   });
   window.assembler = new Building('Assembler I', {
-    col: 16,
-    row: 6
+    col: 6+length+1,
+    row: 4
   });
   assembler.recipe = recipes.Wire;
-  window.arm3 = new Building('Arm', {
-    col: 19,
-    row: 6
+  window.arm2 = new Building('Arm', {
+    col: 6+length+4,
+    row: 4
   });
-  for (let i = 6; i < canvas.height / GRID_SIZE | 0; i++) {
-    const id = i + 21;
-    window['belt' + id] = new Building('Belt I', {
-      id,
-      col: 20,
-      row: i,
-      rotation: Math.PI/2
-    });
-  }
+
+  window.belt = buildings[0];
+  belt.addItem('Nickel');
+  // setInterval(() => belt.addItem('Nickel'), 500);
+  // giveBehavior('spawnItem', buildings[0], { item: 'Nickel', amount: 1, rate: 1 })
+
+
+  // window.DEBUG=true
+  // window.belt = new Building('Belt I', {
+  //   id: 1,
+  //   col: 6,
+  //   row: 4
+  // });
+  // window.belt2 = new Building('Belt I', {
+  //   id: 2,
+  //   col: 7,
+  //   row: 4
+  // });
+  // window.belt3 = new Building('Belt I', {
+  //   id: 3,
+  //   col: 8,
+  //   row: 4
+  // });
+  // window.belt4 = new Building('Belt I', {
+  //   id: 4,
+  //   col: 9,
+  //   row: 1,
+  //   rotation: Math.PI / 2
+  // });
+  // window.belt5 = new Building('Belt I', {
+  //   id: 5,
+  //   col: 9,
+  //   row: 2,
+  //   rotation: Math.PI / 2
+  // });
+  // window.belt6 = new Building('Belt I', {
+  //   id: 6,
+  //   col: 9,
+  //   row: 3,
+  //   rotation: Math.PI / 2
+  // });
+  // window.belt7 = new Building('Belt I', {
+  //   id: 7,
+  //   col: 9,
+  //   row: 4,
+  //   rotation: Math.PI / 2
+  // });
+  // window.belt8 = new Building('Belt I', {
+  //   id: 8,
+  //   col: 9,
+  //   row: 5,
+  //   rotation: Math.PI / 2
+  // });
+  // window.belt9 = new Building('Belt I', {
+  //   id: 9,
+  //   col: 9,
+  //   row: 0,
+  //   rotation: Math.PI / 2
+  // });
+  // window.belt18 = new Building('Belt I', {
+  //   id: 18,
+  //   col: 5,
+  //   row: 6
+  // });
+  // window.belt17 = new Building('Belt I', {
+  //   id: 17,
+  //   col: 6,
+  //   row: 6
+  // });
+  // window.belt10 = new Building('Belt I', {
+  //   id: 10,
+  //   col: 7,
+  //   row: 6
+  // });
+  // window.belt11 = new Building('Belt I', {
+  //   id: 11,
+  //   col: 8,
+  //   row: 6
+  // });
+  // window.belt12 = new Building('Belt I', {
+  //   id: 12,
+  //   col: 9,
+  //   row: 6
+  // });
+  // window.belt13 = new Building('Belt I', {
+  //   id: 13,
+  //   col: 10,
+  //   row: 6
+  // });
+  // window.belt14 = new Building('Belt I', {
+  //   id: 14,
+  //   col: 11,
+  //   row: 6
+  // });
+  // window.belt15 = new Building('Belt I', {
+  //   id: 15,
+  //   col: 12,
+  //   row: 6
+  // });
+  // window.belt16 = new Building('Belt I', {
+  //   id: 16,
+  //   col: 13,
+  //   row: 6
+  // });
+  // window.belt19 = new Building('Belt I', {
+  //   id: 19,
+  //   col: 14,
+  //   row: 6,
+  //   rotation: (Math.PI * 3) / 2
+  // });
+  // window.belt20 = new Building('Belt I', {
+  //   id: 20,
+  //   col: 14,
+  //   row: 5,
+  //   rotation: (Math.PI * 3) / 2
+  // });
+  // window.belt21 = new Building('Belt I', {
+  //   id: 21,
+  //   col: 14,
+  //   row: 4,
+  //   rotation: (Math.PI * 3) / 2
+  // });
+  // window.belt22 = new Building('Belt I', {
+  //   id: 22,
+  //   col: 14,
+  //   row: 3,
+  //   rotation: Math.PI
+  // });
+  // window.belt23 = new Building('Belt I', {
+  //   id: 23,
+  //   col: 13,
+  //   row: 3,
+  //   rotation: Math.PI
+  // });
+  // window.belt24 = new Building('Belt I', {
+  //   id: 24,
+  //   col: 12,
+  //   row: 3,
+  //   rotation: Math.PI
+  // });
+  // window.belt25 = new Building('Belt I', {
+  //   id: 25,
+  //   col: 11,
+  //   row: 3,
+  //   rotation: Math.PI
+  // });
+  // window.belt26 = new Building('Belt I', {
+  //   id: 26,
+  //   col: 10,
+  //   row: 3,
+  //   rotation: Math.PI
+  // });
+
+  // // window.belt.addItem('Copper');
+  // // belt4.addItem('Iron')
+
+  // // const item = new Item('Iron', {
+  // //   count: 1,
+  // // });
+  // // belt4.inventory[1] = item;
+  // // belt4.setItemPosition(item, 1)
+  // // belt5.addItem('Iron')
+  // // belt9.addItem('Iron')
+  // // belt17.addItem('Iron')
+  // // const item2 = new Item('Iron', {
+  // //   count: 1,
+  // // });
+  // // belt17.inventory[1] = item2;
+  // // belt17.setItemPosition(item2, 1)
+  // // belt18.addItem('Iron')
+  // // const item3 = new Item('Iron', {
+  // //   count: 1,
+  // // });
+  // // belt18.inventory[1] = item3;
+  // // belt18.setItemPosition(item3, 1)
+  // // behaviors.spawnItem.add(belt18, {
+  // //   item: 'Iron',
+  // //   amount: 1,
+  // //   rate: 2
+  // // });
+
+  // window.arm = new Building('Arm', {
+  //   col: 4,
+  //   row: 6
+  // });
+  // window.storage = new Building('Storage', {
+  //   col: 3,
+  //   row: 6
+  // });
+  // window.arm2 = new Building('Arm', {
+  //   col: 15,
+  //   row: 6
+  // });
+  // window.assembler = new Building('Assembler I', {
+  //   col: 16,
+  //   row: 6
+  // });
+  // assembler.recipe = recipes.Wire;
+  // window.arm3 = new Building('Arm', {
+  //   col: 19,
+  //   row: 6
+  // });
+  // for (let i = 6; i < canvas.height / GRID_SIZE | 0; i++) {
+  //   const id = i + 21;
+  //   window['belt' + id] = new Building('Belt I', {
+  //     id,
+  //     col: 20,
+  //     row: i,
+  //     rotation: Math.PI/2
+  //   });
+  // }
+
+  //  window.arm3 = new Building('Arm', {
+  //   col: 5,
+  //   row: 5,
+  //   rotation: Math.PI/2
+  // });
+  //  window.storage2 = new Building('Storage', {
+  //   col: 5,
+  //   row: 4
+  // });
+
+   // buildingPopup.init();
+   // buildingPopup.show(assembler);
 }
 
 main();

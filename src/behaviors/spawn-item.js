@@ -14,7 +14,7 @@ class SpawnItemBehavior extends Behavior {
    * @param {Number} options.rate - How often (in seconds) to spawn the item.
    */
   add(building, options = {}) {
-    super.add(building, {
+    return super.add(building, {
       dt: 0,
       allowMultiple: true,
       ...options
@@ -24,6 +24,12 @@ class SpawnItemBehavior extends Behavior {
   _behavior(building, dt) {
     building.behaviors.spawnItem.forEach(spawnItem => {
       const { item, rate, amount } = spawnItem;
+
+      // item hasn't been selected yet to spawn
+      if (!item) {
+        return;
+      }
+
       spawnItem.dt += dt;
 
       while (spawnItem.dt >= rate) {

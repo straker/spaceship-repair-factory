@@ -46,13 +46,13 @@ export async function initBuildings() {
         const promise = loadImage(image)
           .then(img => {
             if (animations) {
-              const sheet = SpriteSheet({
+              building._spriteSheet = SpriteSheet({
                 image: img,
                 frameWidth: GRID_SIZE,
                 frameHeight: GRID_SIZE,
                 animations
               });
-              building.animations = sheet.animations;
+              building.animations = building._spriteSheet.animations;
             } else {
               building.image = img
             }

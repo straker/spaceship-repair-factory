@@ -16,8 +16,7 @@ class PutItemBehavior extends Behavior {
    * @param {Number} options.rate - How often (in seconds) to put the item.
    */
   add(building, options = {}) {
-    super.add(building, {
-      dt: 0,
+    return super.add(building, {
       ...options
     });
   }
@@ -25,16 +24,7 @@ class PutItemBehavior extends Behavior {
   _behavior(building, dt) {
     const { dir } = building;
     const putItem = building.behaviors.putItem[0];
-    const { amount, rate } = putItem;
-
-    // TODO: research can affect move time
-    putItem.dt += dt;
-
-    if (putItem.dt < rate) {
-      return;
-    }
-
-    putItem.dt -= rate;
+    const { amount, rate, animation } = putItem;
 
     const toBuilding = grid.getByType(
       getNextPos(building, dir),
@@ -60,6 +50,13 @@ class PutItemBehavior extends Behavior {
       const numToTake = Math.min(toBuilding.getAmountCanAdd(item), amount);
       const numTaken = building.removeItem(item, numToTake);
       toBuilding.addItem(item, numTaken);
+
+      // TODO: research can affect move time
+      building.behaviors.shared[0].cooldown = rate;
+
+      if (animation) {
+        building.playAnimation('putItem');
+      }
       return;
     }
   }

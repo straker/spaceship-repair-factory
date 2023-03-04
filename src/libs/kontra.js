@@ -1,3 +1,7 @@
+/**
+ * @preserve
+ * Kontra.js v8.0.0
+ */
 let noop = () => {};
 
 // style used for DOM nodes needed for screen readers
@@ -87,7 +91,9 @@ function on(event, callback) {
  * @param {Function} callback - The function that was passed during registration.
  */
 function off(event, callback) {
-  callbacks$2[event] = (callbacks$2[event] || []).filter(fn => fn != callback);
+  callbacks$2[event] = (callbacks$2[event] || []).filter(
+    fn => fn != callback
+  );
 }
 
 /**
@@ -227,63 +233,97 @@ function init$1(canvas, { contextless = false } = {}) {
  * @param {Number[]} properties.frames - List of frames of the animation.
  * @param {Number}  properties.frameRate - Number of frames to display in one second.
  * @param {Boolean} [properties.loop=true] - If the animation should loop.
+ * @param {String} [properties.name] - The name of the animation.
  */
 class Animation {
-  constructor({ spriteSheet, frames, frameRate, loop = true }) {
-    /**
-     * The sprite sheet to use for the animation.
-     * @memberof Animation
-     * @property {SpriteSheet} spriteSheet
-     */
-    this.spriteSheet = spriteSheet;
-
-    /**
-     * Sequence of frames to use from the sprite sheet.
-     * @memberof Animation
-     * @property {Number[]} frames
-     */
-    this.frames = frames;
-
-    /**
-     * Number of frames to display per second. Adjusting this value will change the speed of the animation.
-     * @memberof Animation
-     * @property {Number} frameRate
-     */
-    this.frameRate = frameRate;
-
-    /**
-     * If the animation should loop back to the beginning once completed.
-     * @memberof Animation
-     * @property {Boolean} loop
-     */
-    this.loop = loop;
-
+  constructor({ spriteSheet, frames, frameRate, loop = true, name }) {
     let { width, height, margin = 0 } = spriteSheet.frame;
 
-    /**
-     * The width of an individual frame. Taken from the [frame width value](api/spriteSheet#frame) of the sprite sheet.
-     * @memberof Animation
-     * @property {Number} width
-     */
-    this.width = width;
+    Object.assign(this, {
+      /**
+       * The sprite sheet to use for the animation.
+       * @memberof Animation
+       * @property {SpriteSheet} spriteSheet
+       */
+      spriteSheet,
 
-    /**
-     * The height of an individual frame. Taken from the [frame height value](api/spriteSheet#frame) of the sprite sheet.
-     * @memberof Animation
-     * @property {Number} height
-     */
-    this.height = height;
+      /**
+       * Sequence of frames to use from the sprite sheet.
+       * @memberof Animation
+       * @property {Number[]} frames
+       */
+      frames,
 
-    /**
-     * The space between each frame. Taken from the [frame margin value](api/spriteSheet#frame) of the sprite sheet.
-     * @memberof Animation
-     * @property {Number} margin
-     */
-    this.margin = margin;
+      /**
+       * Number of frames to display per second. Adjusting this value will change the speed of the animation.
+       * @memberof Animation
+       * @property {Number} frameRate
+       */
+      frameRate,
 
-    // f = frame, a = accumulator
-    this._f = 0;
-    this._a = 0;
+      /**
+       * If the animation should loop back to the beginning once completed.
+       * @memberof Animation
+       * @property {Boolean} loop
+       */
+      loop,
+
+      /**
+       * The name of the animation.
+       * @memberof Animation
+       * @property {String} name
+       */
+      name,
+
+      /**
+       * The width of an individual frame. Taken from the [frame width value](api/spriteSheet#frame) of the sprite sheet.
+       * @memberof Animation
+       * @property {Number} width
+       */
+      width,
+
+      /**
+       * The height of an individual frame. Taken from the [frame height value](api/spriteSheet#frame) of the sprite sheet.
+       * @memberof Animation
+       * @property {Number} height
+       */
+      height,
+
+      /**
+       * The space between each frame. Taken from the [frame margin value](api/spriteSheet#frame) of the sprite sheet.
+       * @memberof Animation
+       * @property {Number} margin
+       */
+      margin,
+
+      /**
+       * If the animation is currently stopped. Stopped animations will not update when the [update()](api/animation#update) function is called.
+       *
+       * Animations are not considered stopped until either the [stop()](api/animation#stop) function is called or the animation gets to the last frame and does not loop.
+       *
+       * ```js
+       * import { Animation } from 'kontra';
+       *
+       * let animation = Animation({
+       *   // ...
+       * });
+       * console.log(animation.isStopped);  //=> false
+       *
+       * animation.start();
+       * console.log(animation.isStopped);  //=> false
+       *
+       * animation.stop();
+       * console.log(animation.isStopped);  //=> true
+       * ```
+       * @memberof Animation
+       * @property {Boolean} isStopped
+       */
+      isStopped: false,
+
+      // f = frame, a = accumulator
+      _f: 0,
+      _a: 0
+    });
   }
 
   /**
@@ -295,6 +335,28 @@ class Animation {
    */
   clone() {
     return new Animation(this);
+  }
+
+  /**
+   * Start the animation.
+   * @memberof Animation
+   * @function start
+   */
+  start() {
+    this.isStopped = false;
+
+    if (!this.loop) {
+      this.reset();
+    }
+  }
+
+  /**
+   * Stop the animation.
+   * @memberof Animation
+   * @function stop
+   */
+  stop() {
+    this.isStopped = true;
   }
 
   /**
@@ -315,8 +377,15 @@ class Animation {
    * @param {Number} [dt=1/60] - Time since last update.
    */
   update(dt = 1 / 60) {
+    if (this.isStopped) {
+      return;
+    }
+
     // if the animation doesn't loop we stop at the last frame
-    if (!this.loop && this._f == this.frames.length - 1) return;
+    if (!this.loop && this._f == this.frames.length - 1) {
+      this.stop();
+      return;
+    }
 
     this._a += dt;
 
@@ -457,7 +526,9 @@ function getName(url) {
 
   // remove leading slash if there is no folder in the path
   // @see https://stackoverflow.com/a/50592629/2124254
-  return name.split('/').length == 2 ? name.replace(leadingSlash, '') : name;
+  return name.split('/').length == 2
+    ? name.replace(leadingSlash, '')
+    : name;
 }
 
 /**
@@ -638,7 +709,8 @@ function loadImage(url) {
     let resolvedUrl, image, fullUrl;
 
     resolvedUrl = joinPath(imagePath, url);
-    if (imageAssets[resolvedUrl]) return resolve(imageAssets[resolvedUrl]);
+    if (imageAssets[resolvedUrl])
+      return resolve(imageAssets[resolvedUrl]);
 
     image = new Image();
 
@@ -654,7 +726,8 @@ function loadImage(url) {
 
     image.onerror = function loadImageOnError() {
       reject(
-        /* @ifdef DEBUG */ 'Unable to load image ' + /* @endif */ resolvedUrl
+        /* @ifdef DEBUG */ 'Unable to load image ' +
+          /* @endif */ resolvedUrl
       );
     };
 
@@ -717,7 +790,8 @@ function loadAudio(url) {
     }
 
     resolvedUrl = joinPath(audioPath, url);
-    if (audioAssets[resolvedUrl]) return resolve(audioAssets[resolvedUrl]);
+    if (audioAssets[resolvedUrl])
+      return resolve(audioAssets[resolvedUrl]);
 
     audioEl.addEventListener('canplay', function loadAudioOnLoad() {
       fullUrl = getUrl(resolvedUrl, window.location.href);
@@ -731,7 +805,8 @@ function loadAudio(url) {
 
     audioEl.onerror = function loadAudioOnError() {
       reject(
-        /* @ifdef DEBUG */ 'Unable to load audio ' + /* @endif */ resolvedUrl
+        /* @ifdef DEBUG */ 'Unable to load audio ' +
+          /* @endif */ resolvedUrl
       );
     };
 
@@ -763,7 +838,8 @@ function loadData(url) {
   let resolvedUrl, fullUrl;
 
   resolvedUrl = joinPath(dataPath, url);
-  if (dataAssets[resolvedUrl]) return Promise.resolve(dataAssets[resolvedUrl]);
+  if (dataAssets[resolvedUrl])
+    return Promise.resolve(dataAssets[resolvedUrl]);
 
   return fetch(resolvedUrl)
     .then(response => {
@@ -896,11 +972,7 @@ function radToDeg(rad) {
  * @returns {Number} Angle (in radians) from the source point to the target point.
  */
 function angleToTarget(source, target) {
-  // atan2 returns the counter-clockwise angle in respect to the
-  // x-axis, but the canvas rotation system is based on the y-axis
-  // (rotation of 0 = up). so we need to add a quarter rotation to
-  // return a counter-clockwise rotation in respect to the y-axis
-  return Math.atan2(target.y - source.y, target.x - source.x) + Math.PI / 2;
+  return Math.atan2(target.y - source.y, target.x - source.x);
 }
 
 /**
@@ -934,8 +1006,8 @@ function rotatePoint(point, angle) {
  */
 function movePoint(point, angle, distance) {
   return {
-    x: point.x + Math.sin(angle) * distance,
-    y: point.y - Math.cos(angle) * distance
+    x: point.x + Math.cos(angle) * distance,
+    y: point.y + Math.sin(angle) * distance
   };
 }
 
@@ -988,7 +1060,8 @@ function seedRand(str) {
 
   // then return the seed function and discard the first result
   // @see https://github.com/bryc/code/blob/master/jshash/PRNGs.md#lcg-lehmer-rng
-  let rand = () => ((2 ** 31 - 1) & (seed = Math.imul(48271, seed))) / 2 ** 31;
+  let rand = () =>
+    ((2 ** 31 - 1) & (seed = Math.imul(48271, seed))) / 2 ** 31;
   rand();
   return rand;
 }
@@ -1211,7 +1284,8 @@ class Vector {
     if (x.x != undefined) {
       this.x = x.x;
       this.y = x.y;
-    } else {
+    }
+    else {
       this.x = x;
       this.y = y;
     }
@@ -1899,6 +1973,10 @@ class GameObject extends Updatable {
 
     // uf = update function
     this._uf = update;
+
+    on('init', () => {
+      this.context ??= getContext();
+    });
   }
 
   /**
@@ -2481,19 +2559,14 @@ class Sprite extends GameObject {
    * @param {String} name - Name of the animation to play.
    */
   playAnimation(name) {
+    this.currentAnimation?.stop();
     this.currentAnimation = this.animations[name];
-
-    if (!this.currentAnimation.loop) {
-      this.currentAnimation.reset();
-    }
+    this.currentAnimation.start();
   }
 
   advance(dt) {
     super.advance(dt);
-
-    if (this.currentAnimation) {
-      this.currentAnimation.update(dt);
-    }
+    this.currentAnimation?.update(dt);
   }
   // @endif
 
@@ -2536,6 +2609,8 @@ function factory$8() {
 let fontSizeRegex = /(\d+)(\w+)/;
 
 function parseFont(font) {
+  if (!font) return { computed: 0 };
+
   let match = font.match(fontSizeRegex);
 
   // coerce string to number
@@ -2588,6 +2663,8 @@ function parseFont(font) {
  * @param {Number} [properties.width] - Set a fixed width for the text. If set, the text will automatically be split into new lines that will fit the size when possible.
  * @param {String} [properties.textAlign='left'] - The [textAlign](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign) for the context. If the `dir` attribute is set to `rtl` on the main canvas, the text will automatically be aligned to the right, but you can override that by setting this property.
  * @param {Number} [properties.lineHeight=1] - The distance between two lines of text.
+ * @param {String} [properties.strokeColor] - Stroke color for the text.
+ * @param {number} [properties.lineWidth] - Stroke line width for the text.
  */
 class Text extends GameObject {
   init({
@@ -2621,7 +2698,7 @@ class Text extends GameObject {
      * @memberof Text
      * @property {String} font
      */
-    font = getContext().font,
+    font = getContext()?.font,
 
     /**
      * The color of the text.
@@ -2643,7 +2720,14 @@ class Text extends GameObject {
     });
 
     // p = prerender
-    this._p();
+    if (this.context) {
+      this._p();
+    }
+
+    on('init', () => {
+      this.font ??= getContext().font;
+      this._p();
+    });
   }
 
   // keep width and height getters/settings so we can set _w and _h
@@ -2706,35 +2790,43 @@ class Text extends GameObject {
     this._s = [];
     this._d = false;
     let context = this.context;
+    let text = [this.text];
 
     context.font = this.font;
 
+    // @ifdef TEXT_NEWLINE
+    text = this.text.split('\n');
+    // @endif
+
     // @ifdef TEXT_AUTONEWLINE
-    if (!this._s.length && this._fw) {
-      let parts = this.text.split(' ');
-      let start = 0;
-      let i = 2;
+    if (this._fw) {
+      text.map(t => {
+        let parts = t.split(' ');
+        let str = parts.shift();
+        let nextStr = str;
 
-      // split the string into lines that all fit within the fixed
-      // width
-      for (; i <= parts.length; i++) {
-        let str = parts.slice(start, i).join(' ');
-        let width = context.measureText(str).width;
+        // split the string into lines that all fit within the fixed
+        // width
+        parts.map(part => {
+          nextStr += ' ' + part;
 
-        if (width > this._fw) {
-          this._s.push(parts.slice(start, i - 1).join(' '));
-          start = i - 1;
-        }
-      }
+          if (context.measureText(nextStr).width > this._fw) {
+            this._s.push(str);
+            nextStr = part;
+          }
 
-      this._s.push(parts.slice(start, i).join(' '));
+          str = nextStr;
+        });
+
+        this._s.push(nextStr);
+      });
     }
     // @endif
 
     // @ifdef TEXT_NEWLINE
     if (!this._s.length && this.text.includes('\n')) {
       let width = 0;
-      this.text.split('\n').map(str => {
+      text.map(str => {
         this._s.push(str);
         width = Math.max(width, context.measureText(str).width);
       });
@@ -2748,7 +2840,8 @@ class Text extends GameObject {
       this._w = this._fw || context.measureText(this.text).width;
     }
 
-    this.height = this._fs + (this._s.length - 1) * this._fs * this.lineHeight;
+    this.height =
+      this._fs + (this._s.length - 1) * this._fs * this.lineHeight;
     this._uw();
   }
 
@@ -2759,7 +2852,8 @@ class Text extends GameObject {
 
     // @ifdef TEXT_RTL
     textAlign =
-      this.textAlign || (context.canvas.dir == 'rtl' ? 'right' : 'left');
+      this.textAlign ||
+      (context.canvas.dir == 'rtl' ? 'right' : 'left');
     // @endif
 
     // @ifdef TEXT_ALIGN||TEXT_RTL
@@ -2776,7 +2870,25 @@ class Text extends GameObject {
       context.textAlign = textAlign;
       context.fillStyle = this.color;
       context.font = this.font;
-      context.fillText(str, alignX, this._fs * this.lineHeight * index);
+
+
+      // @ifdef TEXT_STROKE
+      if (this.strokeColor) {
+        context.strokeStyle = this.strokeColor;
+        context.lineWidth = this.lineWidth ?? 1;
+        context.strokeText(
+          str,
+          alignX,
+          this._fs * this.lineHeight * index
+        );
+      }
+      // @endif
+
+      context.fillText(
+        str,
+        alignX,
+        this._fs * this.lineHeight * index
+      );
     });
   }
 }
@@ -2928,7 +3040,9 @@ function circleRectCollision(object, pointer) {
 function getCurrentObject(pointer) {
   // if pointer events are required on the very first frame or
   // without a game loop, use the current frame
-  let renderedObjects = pointer._lf.length ? pointer._lf : pointer._cf;
+  let renderedObjects = pointer._lf.length
+    ? pointer._lf
+    : pointer._cf;
 
   for (let i = renderedObjects.length - 1; i >= 0; i--) {
     let object = renderedObjects[i];
@@ -2982,15 +3096,18 @@ function getCanvasOffset(pointer) {
     transformScaleY;
 
   let paddingWidth =
-    (getPropValue(_s, 'padding-left') + getPropValue(_s, 'padding-right')) *
+    (getPropValue(_s, 'padding-left') +
+      getPropValue(_s, 'padding-right')) *
     transformScaleX;
   let paddingHeight =
-    (getPropValue(_s, 'padding-top') + getPropValue(_s, 'padding-bottom')) *
+    (getPropValue(_s, 'padding-top') +
+      getPropValue(_s, 'padding-bottom')) *
     transformScaleY;
 
   return {
     scaleX: (rect.width - borderWidth - paddingWidth) / canvas.width,
-    scaleY: (rect.height - borderHeight - paddingHeight) / canvas.height,
+    scaleY:
+      (rect.height - borderHeight - paddingHeight) / canvas.height,
     offsetX:
       rect.left +
       (getPropValue(_s, 'border-left-width') +
@@ -2998,7 +3115,8 @@ function getCanvasOffset(pointer) {
         transformScaleX,
     offsetY:
       rect.top +
-      (getPropValue(_s, 'border-top-width') + getPropValue(_s, 'padding-top')) *
+      (getPropValue(_s, 'border-top-width') +
+        getPropValue(_s, 'padding-top')) *
         transformScaleY
   };
 }
@@ -3090,41 +3208,45 @@ function pointerHandler(evt, eventName) {
 
   if (isTouchEvent) {
     // track new touches
-    Array.from(evt.touches).map(({ clientX, clientY, identifier }) => {
-      let touch = pointer.touches[identifier];
-      if (!touch) {
-        touch = pointer.touches[identifier] = {
-          start: {
-            x: (clientX - offsetX) / scaleX,
-            y: (clientY - offsetY) / scaleY
-          }
-        };
-        pointer.touches.length++;
-      }
+    Array.from(evt.touches).map(
+      ({ clientX, clientY, identifier }) => {
+        let touch = pointer.touches[identifier];
+        if (!touch) {
+          touch = pointer.touches[identifier] = {
+            start: {
+              x: (clientX - offsetX) / scaleX,
+              y: (clientY - offsetY) / scaleY
+            }
+          };
+          pointer.touches.length++;
+        }
 
-      touch.changed = false;
-    });
+        touch.changed = false;
+      }
+    );
 
     // handle only changed touches
-    Array.from(evt.changedTouches).map(({ clientX, clientY, identifier }) => {
-      let touch = pointer.touches[identifier];
-      touch.changed = true;
-      touch.x = pointer.x = (clientX - offsetX) / scaleX;
-      touch.y = pointer.y = (clientY - offsetY) / scaleY;
+    Array.from(evt.changedTouches).map(
+      ({ clientX, clientY, identifier }) => {
+        let touch = pointer.touches[identifier];
+        touch.changed = true;
+        touch.x = pointer.x = (clientX - offsetX) / scaleX;
+        touch.y = pointer.y = (clientY - offsetY) / scaleY;
 
-      callCallback(pointer, eventName, evt);
-      emit('touchChanged', evt, pointer.touches);
+        callCallback(pointer, eventName, evt);
+        emit('touchChanged', evt, pointer.touches);
 
-      // remove touches
-      if (eventName == 'onUp') {
-        delete pointer.touches[identifier];
-        pointer.touches.length--;
+        // remove touches
+        if (eventName == 'onUp') {
+          delete pointer.touches[identifier];
+          pointer.touches.length--;
 
-        if (!pointer.touches.length) {
-          emit('touchEnd');
+          if (!pointer.touches.length) {
+            emit('touchEnd');
+          }
         }
       }
-    });
+    );
   } else {
     // translate the scaled size back as if the canvas was at a
     // 1:1 scale
@@ -3147,7 +3269,10 @@ function pointerHandler(evt, eventName) {
  *
  * @returns {{x: Number, y: Number, radius: Number, canvas: HTMLCanvasElement, touches: Object}} The pointer object for the canvas.
  */
-function initPointer({ radius = 5, canvas = getCanvas() } = {}) {
+function initPointer({
+  radius = 5,
+  canvas = getCanvas()
+} = {}) {
   let pointer = pointers.get(canvas);
   if (!pointer) {
     let style = window.getComputedStyle(canvas);
@@ -3780,6 +3905,10 @@ function GameLoop({
     });
   }
 
+  on('init', () => {
+    loop.context ??= getContext();
+  });
+
   /**
    * Called every frame of the game loop.
    */
@@ -3808,7 +3937,7 @@ function GameLoop({
       accumulator -= delta;
     }
 
-    clearFn(context);
+    clearFn(loop.context);
     loop.render();
   }
 
@@ -3851,6 +3980,14 @@ function GameLoop({
      * @property {Boolean} isStopped
      */
     isStopped: true,
+
+    /**
+     * The context the game loop will clear. Defaults to [core.getContext()](api/core#getCcontext).
+     *
+     * @memberof GameLoop
+     * @property {CanvasRenderingContext2D} context
+     */
+    context,
 
     /**
      * Start the game loop.
@@ -4045,18 +4182,19 @@ function updateGamepad() {
       // if the button was not pressed before and is now pressed
       // that's a gamepaddown event
       if (!state && pressed) {
-        [gamepaddownCallbacks[gamepad.index], gamepaddownCallbacks].map(
-          callback => {
-            callback?.[buttonName]?.(gamepad, button);
-          }
-        );
+        [
+          gamepaddownCallbacks[gamepad.index],
+          gamepaddownCallbacks
+        ].map(callback => {
+          callback?.[buttonName]?.(gamepad, button, buttonName);
+        });
       }
       // if the button was pressed before and is now not pressed
       // that's a gamepadup event
       else if (state && !pressed) {
         [gamepadupCallbacks[gamepad.index], gamepadupCallbacks].map(
           callback => {
-            callback?.[buttonName]?.(gamepad, button);
+            callback?.[buttonName]?.(gamepad, button, buttonName);
           }
         );
       }
@@ -4077,8 +4215,14 @@ function updateGamepad() {
  * @function initGamepad
  */
 function initGamepad() {
-  window.addEventListener('gamepadconnected', gamepadConnectedHandler);
-  window.addEventListener('gamepaddisconnected', gamepadDisconnectedHandler);
+  window.addEventListener(
+    'gamepadconnected',
+    gamepadConnectedHandler
+  );
+  window.addEventListener(
+    'gamepaddisconnected',
+    gamepadDisconnectedHandler
+  );
   window.addEventListener('blur', blurEventHandler$1);
 
   // update gamepad state each frame
@@ -4086,7 +4230,7 @@ function initGamepad() {
 }
 
 /**
- * Register a function to be called when a gamepad button is pressed. Takes a single button or an array of buttons. Is passed the [Gamepad](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad) and the [GamepadButton](https://developer.mozilla.org/en-US/docs/Web/API/GamepadButton) that was pressed as parameters.
+ * Register a function to be called when a gamepad button is pressed. Takes a single button or an array of buttons. Is passed the [Gamepad](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad) and the [GamepadButton](https://developer.mozilla.org/en-US/docs/Web/API/GamepadButton), and the buttonName that was pressed as parameters.
  *
  * When registering the function, you have the choice of registering to a specific gamepad or to all gamepads. To register to a specific gamepad, pass the desired gamepad index as the `gamepad` option. If the `gamepad` option is ommited the callback is bound to all gamepads instead of a specific one.
  *
@@ -4097,10 +4241,10 @@ function initGamepad() {
  *
  * initGamepad();
  *
- * onGamepad('start', function(gamepad, button) {
+ * onGamepad('start', function(gamepad, button, buttonName) {
  *   // pause the game
  * });
- * onGamepad(['south', 'rightstick'], function(gamepad, button) {
+ * onGamepad(['south', 'rightstick'], function(gamepad, button, buttonName) {
  *   // fire gun
  * });
  *
@@ -4113,7 +4257,7 @@ function initGamepad() {
  * @function onGamepad
  *
  * @param {String|String[]} buttons - Button or buttons to register callback for.
- * @param {(gamepad: Gamepad, button: GamepadButton) => void} callback - The function to be called when the button is pressed.
+ * @param {(gamepad: Gamepad, button: GamepadButton, buttonName: string) => void} callback - The function to be called when the button is pressed.
  * @param {Object} [options] - Register options.
  * @param {Number} [options.gamepad] - Gamepad index. Defaults to registerting for all gamepads.
  * @param {'gamepaddown'|'gamepadup'} [options.handler='gamepaddown'] - Whether to register to the gamepaddown or gamepadup event.
@@ -4124,7 +4268,9 @@ function onGamepad(
   { gamepad, handler = 'gamepaddown' } = {}
 ) {
   let callbacks =
-    handler == 'gamepaddown' ? gamepaddownCallbacks : gamepadupCallbacks;
+    handler == 'gamepaddown'
+      ? gamepaddownCallbacks
+      : gamepadupCallbacks;
 
   // smaller than doing `Array.isArray(buttons) ? buttons : [buttons]`
   [].concat(buttons).map(button => {
@@ -4159,9 +4305,14 @@ function onGamepad(
  * @param {Number} [options.gamepad] - Gamepad index. Defaults to unregistering from all gamepads.
  * @param {'gamepaddown'|'gamepadup'} [options.handler='gamepaddown'] - Whether to unregister from gamepaddown or gamepadup event.
  */
-function offGamepad(buttons, { gamepad, handler = 'gamepaddown' } = {}) {
+function offGamepad(
+  buttons,
+  { gamepad, handler = 'gamepaddown' } = {}
+) {
   let callbacks =
-    handler == 'gamepaddown' ? gamepaddownCallbacks : gamepadupCallbacks;
+    handler == 'gamepaddown'
+      ? gamepaddownCallbacks
+      : gamepadupCallbacks;
 
   // smaller than doing `Array.isArray(buttons) ? buttons : [buttons]`
   [].concat(buttons).map(button => {
@@ -4353,14 +4504,23 @@ let gestureMap = {
       let absY = Math.abs(y);
       if (absX < this.threshold && absY < this.threshold) return;
 
-      return absX > absY ? (x < 0 ? 'left' : 'right') : y < 0 ? 'up' : 'down';
+      return absX > absY
+        ? x < 0
+          ? 'left'
+          : 'right'
+        : y < 0
+        ? 'up'
+        : 'down';
     }
   },
   pinch: {
     touches: 2,
     threshold: 2,
     touchstart({ 0: touch0, 1: touch1 }) {
-      this.prevDist = Math.hypot(touch0.x - touch1.x, touch0.y - touch1.y);
+      this.prevDist = Math.hypot(
+        touch0.x - touch1.x,
+        touch0.y - touch1.y
+      );
     },
     touchmove({ 0: touch0, 1: touch1 }) {
       let dist = Math.hypot(touch0.x - touch1.x, touch0.y - touch1.y);
@@ -4398,7 +4558,9 @@ function initGesture() {
           // which means there were two other touches that started
           // a gesture
           // @see https://stackoverflow.com/a/33352604/2124254
-          [...Array(touches.length).keys()].every(key => touches[key]) &&
+          [...Array(touches.length).keys()].every(
+            key => touches[key]
+          ) &&
           (type = gesture[evt.type]?.(touches) ?? '') &&
           callbacks[name + type]
         ) {
@@ -4704,7 +4866,10 @@ class Grid extends GameObject {
       let colSpan = spans;
 
       do {
-        colWidths[col] = Math.max(colWidths[col] || 0, width / colSpan);
+        colWidths[col] = Math.max(
+          colWidths[col] || 0,
+          width / colSpan
+        );
         grid[row][col] = child;
       } while (col++ <= numCols && --spans);
 
@@ -4773,7 +4938,8 @@ class Grid extends GameObject {
           if (colSpan > 1 && col + colSpan <= this._nc) {
             for (let i = 1; i < colSpan; i++) {
               colWidth +=
-                colWidths[col + i] + colGap[(col + i) % colGap.length];
+                colWidths[col + i] +
+                colGap[(col + i) % colGap.length];
             }
           }
 
@@ -4938,7 +5104,9 @@ function initKeys() {
   for (i = 0; i < 26; i++) {
     // rollupjs considers this a side-effect (for now), so we'll do it
     // in the initKeys function
-    keyMap['Key' + String.fromCharCode(i + 65)] = String.fromCharCode(i + 97);
+    keyMap['Key' + String.fromCharCode(i + 65)] = String.fromCharCode(
+      i + 97
+    );
   }
 
   // numeric keys
@@ -4981,7 +5149,8 @@ function onKey(
   callback,
   { handler = 'keydown', preventDefault = true } = {}
 ) {
-  let callbacks = handler == 'keydown' ? keydownCallbacks : keyupCallbacks;
+  let callbacks =
+    handler == 'keydown' ? keydownCallbacks : keyupCallbacks;
   // pd = preventDefault
   callback._pd = preventDefault;
   // smaller than doing `Array.isArray(keys) ? keys : [keys]`
@@ -5004,7 +5173,8 @@ function onKey(
  * @param {'keydown'|'keyup'} [options.handler=keydown] - Whether to unregister from keydown or keyup events.
  */
 function offKey(keys, { handler = 'keydown' } = {}) {
-  let callbacks = handler == 'keydown' ? keydownCallbacks : keyupCallbacks;
+  let callbacks =
+    handler == 'keydown' ? keydownCallbacks : keyupCallbacks;
   [].concat(keys).map(key => delete callbacks[key]);
 }
 
@@ -5216,7 +5386,11 @@ function registerPlugin(kontraObj, pluginObj) {
   // create interceptor list and functions
   if (!objectProto._inc) {
     objectProto._inc = {};
-    objectProto._bInc = function beforePlugins(context, method, ...args) {
+    objectProto._bInc = function beforePlugins(
+      context,
+      method,
+      ...args
+    ) {
       return this._inc[method].before.reduce((acc, fn) => {
         let newArgs = fn(context, ...acc);
         return newArgs ? newArgs : acc;
@@ -5249,7 +5423,10 @@ function registerPlugin(kontraObj, pluginObj) {
         // call before interceptors
         let alteredArgs = this._bInc(this, method, ...args);
 
-        let result = objectProto['_o' + method].call(this, ...alteredArgs);
+        let result = objectProto['_o' + method].call(
+          this,
+          ...alteredArgs
+        );
 
         // call after interceptors
         return this._aInc(this, method, result, ...args);
@@ -5289,9 +5466,15 @@ function unregisterPlugin(kontraObj, pluginObj) {
     let method = getMethod(methodName);
 
     if (methodName.startsWith('before')) {
-      removeFromArray(objectProto._inc[method].before, pluginObj[methodName]);
+      removeFromArray(
+        objectProto._inc[method].before,
+        pluginObj[methodName]
+      );
     } else if (methodName.startsWith('after')) {
-      removeFromArray(objectProto._inc[method].after, pluginObj[methodName]);
+      removeFromArray(
+        objectProto._inc[method].after,
+        pluginObj[methodName]
+      );
     }
   });
 }
@@ -5729,7 +5912,10 @@ class Quadtree {
       this._o.push(object);
 
       // split the node if there are too many objects
-      if (this._o.length > this.maxObjects && this._d < this.maxDepth) {
+      if (
+        this._o.length > this.maxObjects &&
+        this._d < this.maxDepth
+      ) {
         this._sp();
 
         // move all objects to their corresponding subnodes
@@ -5919,18 +6105,6 @@ class Scene {
   }) {
     // o = objects
     this._o = [];
-    let canvas = context.canvas;
-
-    // create an accessible DOM node for screen readers (do this first
-    // so we can move DOM nodes in add())
-    // dn = dom node
-    let section = (this._dn = document.createElement('section'));
-    section.tabIndex = -1;
-    section.style = srOnlyStyle;
-    section.id = id;
-    section.setAttribute('aria-label', name);
-
-    addToDom(section, canvas);
 
     // add all properties to the object, overriding any defaults
     Object.assign(this, {
@@ -5943,6 +6117,8 @@ class Scene {
       ...props
     });
 
+    this.add(objects);
+
     /**
      * The camera object which is used as the focal point for the scene. Defaults to to the size of the canvas with a focal point  at its center. The scene will not render objects that are outside the bounds of the camera.
      *
@@ -5950,22 +6126,49 @@ class Scene {
      * @memberof Scene
      * @property {GameObject} camera
      */
-    let { width, height } = canvas;
-    let x = width / 2;
-    let y = height / 2;
     this.camera = factory$9({
-      x,
-      y,
-      width,
-      height,
       context,
-      centerX: x,
-      centerY: y,
       anchor: { x: 0.5, y: 0.5 },
       render: this._rf.bind(this)
     });
 
-    this.add(objects);
+    let init = () => {
+      let canvas = this.context.canvas;
+
+      // create an accessible DOM node for screen readers
+      // (do this first so we can move DOM nodes in add())
+      // dn = dom node
+      let section = (this._dn = document.createElement('section'));
+      section.tabIndex = -1;
+      section.style = srOnlyStyle;
+      section.id = id;
+      section.setAttribute('aria-label', name);
+
+      addToDom(section, canvas);
+
+      let { width, height } = canvas;
+      let x = width / 2;
+      let y = height / 2;
+      Object.assign(this.camera, {
+        x,
+        y,
+        width,
+        height,
+        centerX: x,
+        centerY: y,
+      });
+    };
+
+    if (this.context) {
+      init();
+    }
+
+    on('init', () => {
+      this.context ??= getContext();
+      if (!this._dn) {
+        init();
+      }
+    });
   }
 
   set objects(value) {
@@ -6054,7 +6257,7 @@ class Scene {
    * @function destroy
    */
   destroy() {
-    this._dn.remove();
+    this._dn?.remove();
     this._o.map(object => object.destroy && object.destroy());
   }
 
@@ -6107,7 +6310,9 @@ class Scene {
 
     let objects = _o;
     if (cullObjects) {
-      objects = objects.filter(object => cullFunction(camera, object));
+      objects = objects.filter(object =>
+        cullFunction(camera, object)
+      );
     }
     if (sortFunction) {
       objects.sort(sortFunction);
@@ -6389,7 +6594,9 @@ class SpriteSheet {
 
       // @ifdef DEBUG
       if (frames == undefined) {
-        throw Error('Animation ' + name + ' must provide a frames property');
+        throw Error(
+          'Animation ' + name + ' must provide a frames property'
+        );
       }
       // @endif
 
@@ -6402,7 +6609,8 @@ class SpriteSheet {
         spriteSheet: this,
         frames: sequence,
         frameRate,
-        loop
+        loop,
+        name
       });
     }
   }
@@ -6627,7 +6835,14 @@ class TileEngine {
     });
 
     // p = prerender
-    this._p();
+    if (this.context) {
+      this._p();
+    }
+
+    on('init', () => {
+      this.context ??= getContext();
+      this._p();
+    });
   }
 
   // @ifdef TILEENGINE_CAMERA
@@ -6921,7 +7136,17 @@ class TileEngine {
     let sWidth = Math.min(_canvas.width, width);
     let sHeight = Math.min(_canvas.height, height);
 
-    context.drawImage(_canvas, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
+    context.drawImage(
+      _canvas,
+      sx,
+      sy,
+      sWidth,
+      sHeight,
+      0,
+      0,
+      sWidth,
+      sHeight
+    );
 
     // @ifdef TILEENGINE_CAMERA
     // draw objects
@@ -7167,92 +7392,4 @@ let kontra = {
   VectorClass: Vector
 };
 
-export {
-  factory$b as Animation,
-  Animation as AnimationClass,
-  factory$6 as Button,
-  Button as ButtonClass,
-  GameLoop,
-  factory$9 as GameObject,
-  GameObject as GameObjectClass,
-  factory$5 as Grid,
-  Grid as GridClass,
-  factory$4 as Pool,
-  Pool as PoolClass,
-  factory$3 as Quadtree,
-  Quadtree as QuadtreeClass,
-  factory$2 as Scene,
-  Scene as SceneClass,
-  factory$8 as Sprite,
-  Sprite as SpriteClass,
-  factory$1 as SpriteSheet,
-  SpriteSheet as SpriteSheetClass,
-  factory$7 as Text,
-  Text as TextClass,
-  factory as TileEngine,
-  TileEngine as TileEngineClass,
-  factory$a as Vector,
-  Vector as VectorClass,
-  angleToTarget,
-  audioAssets,
-  clamp,
-  collides,
-  dataAssets,
-  kontra as default,
-  degToRad,
-  depthSort,
-  emit,
-  extendObject,
-  gamepadAxis,
-  gamepadMap,
-  gamepadPressed,
-  gestureMap,
-  getCanvas,
-  getContext,
-  getPointer,
-  getStoreItem,
-  getWorldRect,
-  imageAssets,
-  init$1 as init,
-  initGamepad,
-  initGesture,
-  initInput,
-  initKeys,
-  initPointer,
-  inverseLerp,
-  keyMap,
-  keyPressed,
-  lerp,
-  load,
-  loadAudio,
-  loadData,
-  loadImage,
-  movePoint,
-  off,
-  offGamepad,
-  offGesture,
-  offInput,
-  offKey,
-  offPointer,
-  on,
-  onGamepad,
-  onGesture,
-  onInput,
-  onKey,
-  onPointer,
-  pointerOver,
-  pointerPressed,
-  radToDeg,
-  randInt,
-  registerPlugin,
-  rotatePoint,
-  seedRand,
-  setAudioPath,
-  setDataPath,
-  setImagePath,
-  setStoreItem,
-  track,
-  unregisterPlugin,
-  untrack,
-  updateGamepad
-};
+export { factory$b as Animation, Animation as AnimationClass, factory$6 as Button, Button as ButtonClass, GameLoop, factory$9 as GameObject, GameObject as GameObjectClass, factory$5 as Grid, Grid as GridClass, factory$4 as Pool, Pool as PoolClass, factory$3 as Quadtree, Quadtree as QuadtreeClass, factory$2 as Scene, Scene as SceneClass, factory$8 as Sprite, Sprite as SpriteClass, factory$1 as SpriteSheet, SpriteSheet as SpriteSheetClass, factory$7 as Text, Text as TextClass, factory as TileEngine, TileEngine as TileEngineClass, factory$a as Vector, Vector as VectorClass, angleToTarget, audioAssets, clamp, collides, dataAssets, kontra as default, degToRad, depthSort, emit, extendObject, gamepadAxis, gamepadMap, gamepadPressed, gestureMap, getCanvas, getContext, getPointer, getStoreItem, getWorldRect, imageAssets, init$1 as init, initGamepad, initGesture, initInput, initKeys, initPointer, inverseLerp, keyMap, keyPressed, lerp, load, loadAudio, loadData, loadImage, movePoint, off, offGamepad, offGesture, offInput, offKey, offPointer, on, onGamepad, onGesture, onInput, onKey, onPointer, pointerOver, pointerPressed, radToDeg, randInt, registerPlugin, rotatePoint, seedRand, setAudioPath, setDataPath, setImagePath, setStoreItem, track, unregisterPlugin, untrack, updateGamepad };
