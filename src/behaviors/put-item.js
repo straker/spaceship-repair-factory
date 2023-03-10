@@ -1,6 +1,6 @@
 import Behavior from './behavior.js';
 import grid from '../utils/grid.js';
-import { getNextPos } from '../utils/index.js';
+import { rotatePosition, getNextPos } from '../utils/index.js';
 import { TYPES } from '../constants.js';
 
 class PutItemBehavior extends Behavior {
@@ -14,6 +14,8 @@ class PutItemBehavior extends Behavior {
    * @param {Object} options - Behavior options.
    * @param {Number} options.amount - Number of items to put.
    * @param {Number} options.rate - How often (in seconds) to put the item.
+   * @param {Object} options.pos - The row and col position of the exit point on the building to put the item.
+   * @param {Object} options.animation - Animation data for when the behavior is activated.
    */
   add(building, options = {}) {
     return super.add(building, {
@@ -24,10 +26,14 @@ class PutItemBehavior extends Behavior {
   _behavior(building, dt) {
     const { dir } = building;
     const putItem = building.behaviors.putItem[0];
-    const { amount, rate, animation } = putItem;
+    const { amount, rate, animation, pos } = putItem;
 
+    const position = rotatePosition(pos, building.facing);
     const toBuilding = grid.getByType(
-      getNextPos(building, dir),
+      getNextPos({
+        row: building.row + position.row,
+        col: building.col + position.col
+      }, dir),
       TYPES.building
     )[0];
     if (!toBuilding) {

@@ -56,39 +56,65 @@ async function main() {
     }
   }).start();
 
-  const buildings = [];
-  const length = 5;
+  window.blds = [];
+  window.extractor = new Building('Extractor I', {
+    id: 1,
+    col: 6,
+    row: 4,
+    // rotation: Math.PI*3/2
+  });
+  const length = 3;
   for (let i = 0; i < length; i++) {
-    buildings.push(new Building('Belt I', {
-      id: 1,
-      col: 6+i,
-      row: 4
+    blds.push(new Building('Belt I', {
+      id: i,
+      col: 5+i,
+      row: 6,
+      rotation: 0
     }));
-    buildings.push(new Building('Belt I', {
-      id: 1,
-      col: 6+length+5+i,
-      row: 4
+    blds.push(new Building('Belt I', {
+      id: i+length,
+      col: 5,
+      row: 3+i,
+      rotation: Math.PI/2
+    }));
+    blds.push(new Building('Belt I', {
+      id: i+length*2,
+      col: 6+i,
+      row: 3,
+      rotation: Math.PI
+    }));
+    blds.push(new Building('Belt I', {
+      id: i+length*3,
+      col: 8,
+      row: 4+i,
+      rotation: Math.PI*3/2
     }));
   }
-  window.arm = new Building('Arm', {
-    col: 6+length,
-    row: 4
-  });
-  window.assembler = new Building('Assembler I', {
-    col: 6+length+1,
-    row: 4
-  });
-  assembler.recipe = recipes.Wire;
-  window.arm2 = new Building('Arm', {
-    col: 6+length+4,
-    row: 4
-  });
 
-  window.belt = buildings[0];
-  belt.addItem('Nickel');
+  blds.push(new Building('Thermoelectric Generator', {
+    row: 10,
+    col: 10
+  }))
+  // window.arm = new Building('Arm', {
+  //   col: 6+length,
+  //   row: 4
+  // });
+  // window.assembler = new Building('Assembler I', {
+  //   col: 6+length+1,
+  //   row: 4
+  // });
+  // assembler.recipe = recipes.Wire;
+  // window.arm2 = new Building('Arm', {
+  //   col: 6+length+4,
+  //   row: 4
+  // });
+
+  // window.belt = buildings[0];
+  // belt.addItem('Nickel');
   // setInterval(() => belt.addItem('Nickel'), 500);
   // giveBehavior('spawnItem', buildings[0], { item: 'Nickel', amount: 1, rate: 1 })
 
+  // setTimeout(() => { debugger }, 2000);
 
   // window.DEBUG=true
   // window.belt = new Building('Belt I', {

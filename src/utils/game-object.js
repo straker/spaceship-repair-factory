@@ -7,7 +7,7 @@ export default class GameObject extends SpriteClass {
       properties.anchor = { x: 0.5, y: 0.5 };
     }
 
-    properties.dir = DIRS[properties.facing ?? 0];
+    properties.dir = DIRS[properties.facing ?? Math.PI / 2];
 
     if (properties.x !== undefined) {
       properties.row = (properties.y / GRID_SIZE) | 0;

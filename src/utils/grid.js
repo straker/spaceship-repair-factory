@@ -27,7 +27,7 @@ function forEachTile([startRow, startCol, endRow, endCol], cb) {
   }
 }
 
-function getDimensions(obj) {
+export function getDimensions(obj) {
   return [
     obj.row,
     obj.col,

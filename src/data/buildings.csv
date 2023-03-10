@@ -1,9 +1,10 @@
-,Type,Inventory slots,max stack size,Image,Animations,Behavior,Options
-Extractor I,,,,,,spawnItem,"{""amount"": 1, ""rate"": 1}"
-,,,,,,putItem,"{""amount"": 1, ""rate"": 1}"
-Belt I,,1,1,/src/assets/belt-I.png,"{""0"": {""frames"": [0,1,2,3,4,5], ""frameRate"": 8}, ""90"": {""frames"": [6,7,8,9,10,11], ""frameRate"": 8}, ""180"": {""frames"": [5,4,3,2,1,0], ""frameRate"": 8}, ""270"": {""frames"": [11,10,9,8,7,6], ""frameRate"": 8}}",transportItem,"{""speed"": 1}"
-Assembler I,,,,/src/assets/assembler-I.png,,craftItem,
-Storage,,12,,/src/assets/storage.png,,spawnItem,"{""item"": ""Nickel"", ""amount"": 1, ""rate"": 1}"
-,,,,,,,
-Arm,,1,1,/src/assets/arm.png,"{""0"": {""frames"": [1], ""frameRate"": 8}}",takeItem,"{""amount"": 1, ""rate"": 0.5, ""cooldown"": 0.5, ""animation"": {""frames"": [0,1], ""frameRate"": 8, ""loop"": false}}"
-,,,,,,putItem,"{""amount"": 1, ""rate"": 0.5, ""cooldown"": 0.5, ""animation"": {""frames"": [2,1], ""frameRate"": 8, ""loop"": false}}"
+,Type,Settings,Image,Animations,Behavior,Options
+Extractor I,,"{""inventorySlots"": 1}",/src/assets/extractor-I.png,"{""frameWidth"": 64, ""frameHeight"": 64, ""animations"": {""0"": {""frames"": [0,1], ""frameRate"": 2}}}",spawnItem,"{""item"": ""Nickel"", ""amount"": 1, ""rate"": 1}"
+,,,,,putItem,"{""amount"": 1, ""rate"": 1, ""pos"": {""row"": 0, ""col"": 1}}"
+Belt I,,"{""inventorySlots"": 1, ""maxStackSize"": 1}",/src/assets/belt-I.png,"{""frameWidth"": 32, ""frameHeight"": 32, ""animations"": {""0"": {""frames"": [0,1,2,3,4,5], ""frameRate"": 8}, ""90"": {""frames"": [6,7,8,9,10,11], ""frameRate"": 8}, ""180"": {""frames"": [5,4,3,2,1,0], ""frameRate"": 8}, ""270"": {""frames"": [11,10,9,8,7,6], ""frameRate"": 8}}}",transportItem,"{""speed"": 1}"
+Assembler I,,,/src/assets/assembler-I.png,,craftItem,
+Storage,,"{""inventorySlots"": 1}",/src/assets/storage.png,,spawnItem,"{""item"": ""Nickel"", ""amount"": 1, ""rate"": 1}"
+,,,,,,
+Arm,,"{""inventorySlots"": 1, ""maxStackSize"": 1}",/src/assets/arm.png,"{""frameWidth"": 32, ""frameHeight"": 32, ""animations"": {""0"": {""frames"": [1], ""frameRate"": 8}}}",takeItem,"{""amount"": 1, ""rate"": 0.5, ""animation"": {""frames"": [0,1], ""frameRate"": 8, ""loop"": false}}"
+,,,,,putItem,"{""amount"": 1, ""rate"": 0.5, ""animation"": {""frames"": [2,1], ""frameRate"": 8, ""loop"": false}}"
+Thermoelectric Generator,,"{""inventorySlots"": 0}",/src/assets/thermoelectric-generator.png,,,

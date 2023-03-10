@@ -1,6 +1,6 @@
 /**
  * @preserve
- * Kontra.js v8.0.0
+ * Kontra.js v9.0.0
  */
 let noop = () => {};
 
@@ -6117,7 +6117,14 @@ class Scene {
       ...props
     });
 
-    this.add(objects);
+    // create an accessible DOM node for screen readers
+    // (do this first so we can move DOM nodes in add())
+    // dn = dom node
+    let section = (this._dn = document.createElement('section'));
+    section.tabIndex = -1;
+    section.style = srOnlyStyle;
+    section.id = id;
+    section.setAttribute('aria-label', name);
 
     /**
      * The camera object which is used as the focal point for the scene. Defaults to to the size of the canvas with a focal point  at its center. The scene will not render objects that are outside the bounds of the camera.
@@ -6126,49 +6133,57 @@ class Scene {
      * @memberof Scene
      * @property {GameObject} camera
      */
-    this.camera = factory$9({
+    let _this = this;
+    class Camera extends GameObject {
+      set x(value) {
+        _this.sx = value - this.centerX;
+        super.x = value;
+      }
+      get x() {
+        return super.x;
+      }
+      set y(value) {
+        _this.sy = value - this.centerY;
+        super.y = value;
+      }
+      get y() {
+        return super.y;
+      }
+    }
+    this.camera = new Camera({
       context,
       anchor: { x: 0.5, y: 0.5 },
       render: this._rf.bind(this)
     });
 
-    let init = () => {
+    this.add(objects);
+
+    // i = init
+    this._i = () => {
+      this.context ??= getContext();
       let canvas = this.context.canvas;
-
-      // create an accessible DOM node for screen readers
-      // (do this first so we can move DOM nodes in add())
-      // dn = dom node
-      let section = (this._dn = document.createElement('section'));
-      section.tabIndex = -1;
-      section.style = srOnlyStyle;
-      section.id = id;
-      section.setAttribute('aria-label', name);
-
-      addToDom(section, canvas);
-
       let { width, height } = canvas;
       let x = width / 2;
       let y = height / 2;
       Object.assign(this.camera, {
+        centerX: x,
+        centerY: y,
         x,
         y,
         width,
         height,
-        centerX: x,
-        centerY: y,
       });
+
+      if (!this._dn.isConnected) {
+        addToDom(this._dn, canvas);
+      }
     };
 
     if (this.context) {
-      init();
+      this._i();
     }
 
-    on('init', () => {
-      this.context ??= getContext();
-      if (!this._dn) {
-        init();
-      }
-    });
+    on('init', this._i);
   }
 
   set objects(value) {
@@ -6190,6 +6205,7 @@ class Scene {
   add(...objects) {
     objects.flat().map(object => {
       this._o.push(object);
+      object.parent = this;
 
       // move all objects to be in the scenes DOM node so we can
       // hide and show the DOM node and thus hide and show all the
@@ -6210,6 +6226,7 @@ class Scene {
   remove(...objects) {
     objects.flat().map(object => {
       removeFromArray(this._o, object);
+      object.parent = null;
 
       getAllNodes(object).map(node => {
         addToDom(node, this.context);
@@ -6257,7 +6274,8 @@ class Scene {
    * @function destroy
    */
   destroy() {
-    this._dn?.remove();
+    off('init', this._i);
+    this._dn.remove();
     this._o.map(object => object.destroy && object.destroy());
   }
 
@@ -6868,11 +6886,13 @@ class TileEngine {
   // region, otherwise. Firefox and Safari won't draw it.
   // @see http://stackoverflow.com/questions/19338032/canvas-indexsizeerror-index-or-size-is-negative-or-greater-than-the-allowed-a
   set sx(value) {
-    this._sx = clamp(0, this.mapwidth - getCanvas().width, value);
+    let max = Math.max(0, this.mapwidth - getCanvas().width);
+    this._sx = clamp(0, max, value);
   }
 
   set sy(value) {
-    this._sy = clamp(0, this.mapheight - getCanvas().height, value);
+    let max = Math.max(0, this.mapheight - getCanvas().height);
+    this._sy = clamp(0, max, value);
   }
 
   set objects(value) {
@@ -6894,6 +6914,7 @@ class TileEngine {
   add(...objects) {
     objects.flat().map(object => {
       this._o.push(object);
+      object.parent = this;
     });
   }
 
@@ -6907,6 +6928,7 @@ class TileEngine {
   remove(...objects) {
     objects.flat().map(object => {
       removeFromArray(this._o, object);
+      object.parent = null;
     });
   }
   // @endif

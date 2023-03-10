@@ -19,12 +19,11 @@ export async function initBuildings() {
     .forEach(cells => {
       const name = cells[0];
       const type = cells[1];
-      const inventorySlots = cells[2];
-      const maxStackSize = cells[3];
-      const image = cells[4];
-      const animations = cells[5] ? JSON.parse(cells[5]) : false;
-      const behavior = cells[6];
-      const behaviorOptions = cells[7] ? JSON.parse(cells[7]) : {};
+      const settings = cells[2] ? JSON.parse(cells[2]) : {};
+      const image = cells[3];
+      const animations = cells[4] ? JSON.parse(cells[4]) : false;
+      const behavior = cells[5];
+      const behaviorOptions = cells[6] ? JSON.parse(cells[6]) : {};
 
       console.log({name, behavior})
 
@@ -37,8 +36,8 @@ export async function initBuildings() {
       const building = createBuilding(name, {
         enabled: true,
         type,
-        inventorySlots,
-        maxStackSize,
+        inventorySlots: settings.inventorySlots,
+        maxStackSize: settings.maxStackSize,
         behaviors: behavior ? [[behavior, behaviorOptions]] : []
       });
 
@@ -48,9 +47,9 @@ export async function initBuildings() {
             if (animations) {
               building._spriteSheet = SpriteSheet({
                 image: img,
-                frameWidth: GRID_SIZE,
-                frameHeight: GRID_SIZE,
-                animations
+                frameWidth: animations.frameWidth ?? GRID_SIZE,
+                frameHeight: animations.frameHeight ?? GRID_SIZE,
+                animations: animations.animations
               });
               building.animations = building._spriteSheet.animations;
             } else {

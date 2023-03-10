@@ -20,7 +20,7 @@ export default class Building extends GameObject {
       ...props,
       ...properties,
       _name: name,
-      facing: properties.facing || properties.rotation || 0,
+      facing: properties.facing ?? properties.rotation ?? Math.PI / 2,
       type: TYPES.building + (TYPES[type] ? TYPES[type] : 0),
       behaviors: {},
       behaviorsConfig: behaviors,
@@ -73,6 +73,28 @@ export default class Building extends GameObject {
   }
   get rotation() {
     return 0;
+  }
+
+  draw() {
+    const { context, animations, x, y, width, height, facing } = this;
+    context.save();
+
+    // only apply rotation if the building does not have
+    // animations that cover the directions
+    if (animations && !animations[90]) {
+      context.translate(
+        width / 2,
+        height / 2
+      );
+      context.rotate(facing - Math.PI / 2);
+      context.translate(
+        -width / 2,
+        -height / 2
+      );
+    }
+
+    super.draw();
+    context.restore();
   }
 
   /**

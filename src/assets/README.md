@@ -13,3 +13,9 @@
   - crafters
   - power stations
   - things that make things (think Barrack in WarCraft or StarCraft)
+
+For 1-bit assets, use color codes for building types
+
+- power buildings: yellow
+- extractor buildings (raw resource generators): blue
+- transport white

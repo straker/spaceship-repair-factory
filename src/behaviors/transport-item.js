@@ -1,4 +1,4 @@
-import { collides } from '../libs/kontra.js';
+import { collides, angleToTarget, movePoint } from '../libs/kontra.js';
 import Behavior from './behavior.js';
 import grid from '../utils/grid.js';
 import { deepCopy, removeFromArray } from '../utils/index.js';
@@ -69,8 +69,23 @@ class TransportItemBehavior extends Behavior {
           // update items in FIFO order
           for (let i = building.inventorySlots - 1; i >= 0; i--) {
             const item = building.inventory[i];
-
             if (!item) {
+              continue;
+            }
+
+            if (item.transitioning) {
+              const { endPos, nextBuilding, speed } = item.transitioning;
+              const angle = angleToTarget(item, endPos);
+              const { x, y } = movePoint(item, angle, speed);
+              item.x = x;
+              item.y = y;
+
+              const dx = Math.max(item.x, endPos.x) - Math.min(item.x, endPos.x);
+              const dy = Math.max(item.y, endPos.y) - Math.min(item.y, endPos.y);
+              if (dx < speed && dy < speed) {
+                item.transitioning = false;
+                nextBuilding.setItemPosition(item, 0);
+              }
               continue;
             }
 
@@ -94,44 +109,6 @@ class TransportItemBehavior extends Behavior {
                 continue;
               }
 
-              // perpendicular transport direction
-              if (building.dir !== building.next.dir) {
-                // the item will be placed into slot 0 of the
-                // building but will immediately move and
-                // enter the next slot, so we need to look
-                // at both of them
-                const [firstItem, secondItem] = building.next.inventory;
-
-                // allow the item to fit into a smaller hole
-                // in the belt density
-                building.next.setItemPosition(nextPos, 0);
-                nextPos.width -= item.margin;
-                nextPos.height -= item.margin;
-
-                if (
-                  (secondItem && firstItem) ||
-                  (secondItem && collides(nextPos, secondItem))
-                ) {
-                  building.setItemPosition(item, i);
-                  continue;
-                }
-
-                building.next.setItemPosition(item, 0);
-                building.inventory[i] = undefined;
-
-                if (!secondItem) {
-                  item.x += building.next.dir.col * distance;
-                  item.y += building.next.dir.row * distance;
-
-                  building.next.inventory[1] = item;
-                } else {
-                  building.next.inventory[0] = item;
-                }
-
-                continue;
-              }
-
-              // same dir transport building
               const nextItem = building.next.inventory[0];
               if (nextItem) {
                 building.setItemPosition(item, i);
@@ -140,6 +117,15 @@ class TransportItemBehavior extends Behavior {
 
               item.x = nextPos.x;
               item.y = nextPos.y;
+
+              building.next.setItemPosition(nextPos, 0);
+              const dist = Math.hypot(item.x - nextPos.x, item.y - nextPos.y);
+              item.transitioning = {
+                dir: building.dir,
+                endPos: nextPos,
+                speed: dist / GRID_SIZE * speed,
+                nextBuilding: building.next
+              };
 
               building.inventory[i] = undefined;
               building.next.inventory[0] = item;

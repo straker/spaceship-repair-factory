@@ -1,4 +1,5 @@
-import { degToRad } from '../libs/kontra.js';
+import { degToRad, rotatePoint } from '../libs/kontra.js';
+import { GRID_SIZE } from '../constants.js';
 
 /**
  * Remove an item from an array.
@@ -21,11 +22,30 @@ export function removeFromArray(array, item, { splice = true } = {}) {
 /**
  * Rotate an object and ensure the final value is between 0 and Math.PI * 2.
  * @param {Object} object - Object to rotate.
- * @param {Number} deg - How muu (in degrees).
+ * @param {Number} deg - How much to rotate (in degrees).
  * @return {Number} The final rotation (in radians).
  */
 export function rotate(object, deg) {
   return (object.rotation + degToRad(deg)) % (Math.PI * 2);
+}
+
+/**
+ * Rotate a position around the angle.
+ * @param {Object} pos - Current position.
+ * @param {Number} angle - Angle of rotation (in radians).
+ * @return {Object} The row and column of the rotation.
+ */
+export function rotatePosition(pos, angle) {
+  let point = {
+    x: pos.col * GRID_SIZE,
+    y: pos.row * GRID_SIZE
+  };
+  point = rotatePoint(point, angle);
+
+  return {
+    row: point.y <= 0 ? 0 : Math.round(point.y) / GRID_SIZE,
+    col: point.x <= 0 ? 0 : Math.round(point.x) / GRID_SIZE
+  };
 }
 
 /**

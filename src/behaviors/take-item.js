@@ -49,7 +49,7 @@ class TakeItemBehavior extends Behavior {
     // TODO: filtering
     for (let i = 0; i < items.length; i++) {
       const [item, count] = items[i];
-      if (count <= 0 || !building.canAddItem(item)) {
+      if (items[i].transitioning || count <= 0 || !building.canAddItem(item)) {
         continue;
       }
 
