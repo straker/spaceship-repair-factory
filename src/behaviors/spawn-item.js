@@ -21,7 +21,7 @@ class SpawnItemBehavior extends Behavior {
     });
   }
 
-  _behavior(building, dt) {
+  behavior(building, dt) {
     building.behaviors.spawnItem.forEach(spawnItem => {
       const { item, rate, amount } = spawnItem;
 

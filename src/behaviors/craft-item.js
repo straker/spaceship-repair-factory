@@ -50,7 +50,7 @@ class CraftItemBehavior extends Behavior {
     });
   }
 
-  _behavior(building, dt) {
+  behavior(building, dt) {
     const {
       crafting,
       inputs,

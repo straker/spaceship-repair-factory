@@ -10,10 +10,10 @@ export const behaviors = {
   craftItem: craftItemBehavior,
   generatePower: generatePowerBehavior,
   putItem: putItemBehavior,
-  shared: sharedBehavior
+  shared: sharedBehavior,
   spawnItem: spawnItemBehavior,
   takeItem: takeItemBehavior,
-  transportItem: transportItemBehavior,
+  transportItem: transportItemBehavior
 };
 
 /**

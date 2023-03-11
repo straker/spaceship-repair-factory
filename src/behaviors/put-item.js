@@ -23,7 +23,7 @@ class PutItemBehavior extends Behavior {
     });
   }
 
-  _behavior(building, dt) {
+  behavior(building, dt) {
     const { dir } = building;
     const putItem = building.behaviors.putItem[0];
     const { amount, rate, animation, pos } = putItem;

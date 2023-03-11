@@ -31,7 +31,7 @@ export default class Behavior {
        * Remove the behavior from the building.
        */
       remove() {
-        _this._remove(building, behaviorOptions);
+        _this.remove(building, behaviorOptions);
       }
     };
 
@@ -39,7 +39,7 @@ export default class Behavior {
     return behaviorOptions;
   }
 
-  _remove(building, behavior) {
+  remove(building, behavior) {
     const { name, buildings } = this;
     removeFromArray(building.behaviors[name], behavior);
 
@@ -54,11 +54,16 @@ export default class Behavior {
    */
   run(dt) {
     this.buildings.forEach(building => {
-      if (building.behaviors.shared[0].cooldown) {
+      const shared = building.behaviors.shared[0];
+      if (shared.cooldown) {
         return;
       }
 
-      this._behavior(building, dt);
+      if (building.requiredPower && !shared.isPowered) {
+        return;
+      }
+
+      this.behavior(building, dt);
     });
   }
 
@@ -68,5 +73,5 @@ export default class Behavior {
    * @param {Building} building - building to execute behavior on.
    * @param {Number} dt - Time update.
    */
-  _behavior() {}
+  behavior() {}
 }

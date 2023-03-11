@@ -1,5 +1,5 @@
 import GameObject from './utils/game-object.js';
-import { radToDeg, SpriteSheet } from './libs/kontra.js';
+import { radToDeg, SpriteSheet, emit } from './libs/kontra.js';
 import { i18n } from './data/translations.js';
 import { buildings } from './data/buildings.js';
 import { items } from './data/items.js';
@@ -31,8 +31,15 @@ export default class Building extends GameObject {
        */
       inventory: []
     };
+    console.log(properties.type);
 
     super(properties);
+    // give every building the shared behavior
+    giveBehavior('shared', this);
+
+    // emit events before adding other behaviors so those
+    // behaviors don't trigger events
+    emit('building:placed', this);
 
     behaviors.forEach(([name, options]) => {
       giveBehavior(name, this, options);
@@ -52,8 +59,6 @@ export default class Building extends GameObject {
         this.animations = this._spriteSheet.animations;
       }
     });
-    // give every building the shared behavior
-    giveBehavior('shared', this);
     grid.add(this);
 
     // auto-play directional animations

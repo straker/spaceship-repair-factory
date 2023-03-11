@@ -12,7 +12,7 @@ export const TYPES = {
   component: 1,
   building: 2,
   transport: 4,
-  assembler: 8
+  power: 8
 };
 
 export let COLORS = {

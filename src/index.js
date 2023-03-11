@@ -24,6 +24,7 @@ async function main() {
     // fps: 15,
     update(dt) {
       behaviors.shared.run(dt);
+      behaviors.generatePower.run(dt);
       behaviors.spawnItem.run(dt);
       behaviors.takeItem.run(dt);
       behaviors.putItem.run(dt);
@@ -56,6 +57,7 @@ async function main() {
     }
   }).start();
 
+  window.DEBUG = true
   window.blds = [];
   window.extractor = new Building('Extractor I', {
     id: 1,
@@ -91,10 +93,19 @@ async function main() {
     }));
   }
 
-  blds.push(new Building('Thermoelectric Generator', {
-    row: 10,
+  window.power = new Building('Thermoelectric Generator', {
+    row: 9,
     col: 10
-  }))
+  });
+  window.power2 = new Building('Thermoelectric Generator', {
+    row: 12,
+    col: 10
+  });
+
+  window.assembler = new Building('Assembler I', {
+    row: 14,
+    col: 14
+  });
   // window.arm = new Building('Arm', {
   //   col: 6+length,
   //   row: 4

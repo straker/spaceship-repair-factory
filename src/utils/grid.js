@@ -1,5 +1,5 @@
 import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT } from '../constants.js';
-import { removeFromArray } from './index.js';
+import { removeFromArray, toGrid, getDimensions } from './index.js';
 
 let objects = [];
 let tiles = [];
@@ -13,29 +13,13 @@ for (let row = 0; row < rows; row++) {
   }
 }
 
-// turn an x/y value into a grid row/col value
-export function toGrid(value) {
-  return (value / GRID_SIZE) | 0;
-}
-
 // loop over each tile an object occupies
-function forEachTile([startRow, startCol, endRow, endCol], cb) {
+function forEachTile({startRow, startCol, endRow, endCol}, cb) {
   for (let row = startRow; row <= endRow; row++) {
     for (let col = startCol; col <= endCol; col++) {
       cb(tiles[row]?.[col] ?? []);
     }
   }
-}
-
-export function getDimensions(obj) {
-  return [
-    obj.row,
-    obj.col,
-    // subtract 1 since a 32x32 obj should occupy one tile
-    // not two (32 / 32 = 1)
-    obj.row + toGrid(obj.height - 1),
-    obj.col + toGrid(obj.width - 1)
-  ];
 }
 
 const grid = {

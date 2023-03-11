@@ -25,8 +25,6 @@ export async function initBuildings() {
       const behavior = cells[5];
       const behaviorOptions = cells[6] ? JSON.parse(cells[6]) : {};
 
-      console.log({name, behavior})
-
       // use last entry to add multiple behaviors to a building
       if (!name && behavior) {
         lastEntry.behaviors.push([behavior, behaviorOptions]);
@@ -34,10 +32,9 @@ export async function initBuildings() {
       }
 
       const building = createBuilding(name, {
+        ...settings,
         enabled: true,
         type,
-        inventorySlots: settings.inventorySlots,
-        maxStackSize: settings.maxStackSize,
         behaviors: behavior ? [[behavior, behaviorOptions]] : []
       });
 

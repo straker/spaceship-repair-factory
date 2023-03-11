@@ -30,8 +30,8 @@ class TransportItemBehavior extends Behavior {
     addTransport(building);
   }
 
-  _remove(building, behavior) {
-    super._remove(building, behavior);
+  remove(building, behavior) {
+    super.remove(building, behavior);
     removeTransport(building);
   }
 

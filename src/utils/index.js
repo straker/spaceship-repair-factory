@@ -164,3 +164,76 @@ export function removeFromStack(
 
   return amount - diff;
 }
+
+/**
+ * Check if a point is inside a circle.
+ * @param {Object} point - X and y coordinate of the point.
+ * @param {Object} circle - X and y coordinate of the circle.
+ * @param {Number} radius - Radius of the circle.
+ * @return {Boolean} True if the point is inside the circle.
+ */
+export function pointInsideCircle(point, circle, radius) {
+  const dx = circle.x - point.x;
+  const dy = circle.y - point.y;
+  return dx * dx + dy * dy < radius * radius;
+}
+
+// turn an x/y value into a grid row/col value
+export function toGrid(value) {
+  return (value / GRID_SIZE) | 0;
+}
+
+/**
+ * Get a list of row/col coordinates that are within a circle.
+ * @see https://www.redblobgames.com/grids/circle-drawing/
+ * @param {Object} circle - X and y coordinate of the circle.
+ * @param {Number} radius - Radius (in number of tiles) of the circle.
+ * @return {Object[]} Array of row/col coordinates.
+ */
+const getTilesInCircleCache = {};
+export function getTilesInCircle(circle, radius) {
+  const cacheKey = JSON.stringify(circle) + ':' + radius;
+  const cacheValue = getTilesInCircleCache[cacheKey];
+  if (cacheValue) {
+    return cacheValue;
+  }
+
+  const tiles = [];
+  const startRow = toGrid(circle.y) - radius;
+  const startCol = toGrid(circle.x) - radius;
+  const endRow = toGrid(circle.y) + radius;
+  const endCol = toGrid(circle.y) + radius;
+
+  forEachTileInCircle({ startRow, startCol, endRow, endCol }, circle, radius, tile => tiles.push(tile));
+
+  getTilesInCircleCache[cacheKey] = tiles;
+  return tiles;
+}
+
+export function forEachTileInCircle({ startRow, startCol, endRow, endCol }, circle, radius, cb) {
+  // circles look better when they add 0.5 to the radius, but only if the center is not an intersection
+  const r = circle.x % GRID_SIZE === 0 ? radius : radius + 0.5;
+
+  for (let row = startRow; row <= endRow; row++) {
+    for (let col = startCol; col <= endCol; col++) {
+      const centerOfTile = {
+        x: (col + 0.5) * GRID_SIZE,
+        y: (row + 0.5) * GRID_SIZE
+      };
+      if (pointInsideCircle(centerOfTile, circle, r * GRID_SIZE)) {
+        cb({row, col});
+      }
+    }
+  }
+}
+
+export function getDimensions(obj) {
+  return {
+    startRow: obj.row,
+    startCol: obj.col,
+    // subtract 1 since a 32x32 obj should occupy one tile
+    // not two (32 / 32 = 1)
+    endRow: obj.row + toGrid(obj.height - 1),
+    endCol: obj.col + toGrid(obj.width - 1)
+  };
+}

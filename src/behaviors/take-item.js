@@ -22,7 +22,7 @@ class TakeItemBehavior extends Behavior {
     });
   }
 
-  _behavior(building, dt) {
+  behavior(building, dt) {
     const { dir } = building;
     const takeItem = building.behaviors.takeItem[0];
     const { amount, rate, cooldown, animation } = takeItem;
