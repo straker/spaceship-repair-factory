@@ -10,12 +10,12 @@ import { setLang } from './data/translations.js';
 const { canvas, context } = initKontra();
 
 export default async function init() {
-  initInput();
+  const { pointer } = initInput();
 
   await initConfig(); // must be loaded first
   await setLang('en');
   await initItems();
   await initBuildings();
   await initTasks();
-  return { canvas, context };
+  return { canvas, context, pointer };
 }

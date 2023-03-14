@@ -26,7 +26,7 @@ class PutItemBehavior extends Behavior {
   behavior(building, dt) {
     const { dir } = building;
     const putItem = building.behaviors.putItem[0];
-    const { amount, rate, animation, pos } = putItem;
+    const { amount, rate, animation, pos = { row: 0, col: 0 } } = putItem;
 
     const position = rotatePosition(pos, building.facing);
     const toBuilding = grid.getByType(

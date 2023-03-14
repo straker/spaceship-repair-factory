@@ -5,10 +5,12 @@ import {
   pointInsideCircle,
   getTilesInCircle,
   getDimensions,
-  forEachTileInCircle
+  forEachTileInCircle,
+  removeFromArray
 } from '../utils/index.js';
 import { TYPES, GRID_SIZE } from '../constants.js';
 import { on, off } from '../libs/kontra.js';
+import { getState, setState } from '../state.js';
 
 function fillCricle(building, radius) {
   const tiles = getTilesInCircle({
@@ -55,10 +57,10 @@ class GeneratePowerBehavior extends Behavior {
       - will need a total amount of power generated and total amount of power draw
     */
 
-    // on('updatePower', () => {
 
-    // });
-    const { radius } = options;
+    const { amount, radius } = options;
+
+    setState('power', getState('power', 0) + amount);
 
     // find all buildings within the power range and mark them
     // as being powered
@@ -78,6 +80,7 @@ class GeneratePowerBehavior extends Behavior {
     building.onBuildingPlaced = building.onBuildingPlaced.bind(building);
     on('building:placed', building.onBuildingPlaced);
 
+    // TOOD: remove
     const render = building.render.bind(building);
     building.render = function() {
       const generatePower = building.behaviors.generatePower[0];
@@ -96,7 +99,11 @@ class GeneratePowerBehavior extends Behavior {
 
   remove(building, behavior) {
     super.remove(building, behavior);
+    setState('power', getState('power') - behavior.amount);
     off('building:placed', building.onBuildingPlaced);
+    building.powering.forEach(bld => {
+      removeFromArray(bld.poweredBy, building);
+    });
   }
 
   behavior(building, dt) {
@@ -116,15 +123,10 @@ const generatePowerProperties = {
    * @param {Building} building - Building to give power to.
    */
   powerBuilding(building) {
-    const sharedBehavior = building.behaviors.shared[0];
-
-    // don't power other power buildings
-    if (building.type & TYPES.power) {
-      return;
+    if (building.requiresPower && !building.poweredBy.includes(this)) {
+      this.powering.push(building);
+      building.poweredBy.push(this);
     }
-
-    this.powering.push(building);
-    sharedBehavior.poweredBy.push(this);
   },
 
   /**

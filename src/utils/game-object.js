@@ -9,7 +9,7 @@ export default class GameObject extends SpriteClass {
     }
 
     // down is the default direction
-    properties.dir = DIRS[properties.facing ?? Math.PI / 2];
+    properties.dir = DIRS[properties.facing ?? 0];
 
     if (properties.x !== undefined) {
       properties.row = toGrid(properties.y);

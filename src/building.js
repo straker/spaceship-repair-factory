@@ -1,5 +1,5 @@
 import GameObject from './utils/game-object.js';
-import { radToDeg, SpriteSheet, emit } from './libs/kontra.js';
+import { radToDeg, SpriteSheet, emit, degToRad } from './libs/kontra.js';
 import { i18n } from './data/translations.js';
 import { buildings } from './data/buildings.js';
 import { items } from './data/items.js';
@@ -10,17 +10,27 @@ import grid from './utils/grid.js';
 
 export default class Building extends GameObject {
   constructor(name, properties = {}) {
-    const { type, behaviors, ...props } = buildings[name];
+    const { type, behaviors, ...props } = buildings[name] ?? {};
 
     if (!TYPES[type]) {
       // TODO: warn of bad type
     }
+    const defaultDir = (props.defaultDir ? degToRad(props.defaultDir) : 0);
+    let facing = properties.facing ?? properties.rotation;
+    if (facing) {
+      facing += defaultDir;
+    }
+    else {
+      facing = defaultDir;
+    }
 
     properties = {
+      allowRotation: !props.animations || !props.animations['90'],
       ...props,
       ...properties,
       _name: name,
-      facing: properties.facing ?? properties.rotation ?? Math.PI / 2,
+      defaultDir,
+      facing,
       type: TYPES.building + (TYPES[type] ? TYPES[type] : 0),
       behaviors: {},
       behaviorsConfig: behaviors,
@@ -31,9 +41,11 @@ export default class Building extends GameObject {
        */
       inventory: []
     };
-    console.log(properties.type);
 
     super(properties);
+
+    if (!name) return;
+
     // give every building the shared behavior
     giveBehavior('shared', this);
 
@@ -81,17 +93,15 @@ export default class Building extends GameObject {
   }
 
   draw() {
-    const { context, animations, x, y, width, height, facing } = this;
+    const { context, allowRotation, x, y, width, height, facing } = this;
     context.save();
 
-    // only apply rotation if the building does not have
-    // animations that cover the directions
-    if (animations && !animations[90]) {
+    if (allowRotation) {
       context.translate(
         width / 2,
         height / 2
       );
-      context.rotate(facing - Math.PI / 2);
+      context.rotate(facing - this.defaultDir);
       context.translate(
         -width / 2,
         -height / 2
@@ -100,6 +110,15 @@ export default class Building extends GameObject {
 
     super.draw();
     context.restore();
+  }
+
+  update(dt) {
+    // do not draw animations for buildings that are unpowered
+    if (!this.isPowered()) {
+      return;
+    }
+
+    super.update(dt);
   }
 
   /**
@@ -242,6 +261,16 @@ export default class Building extends GameObject {
    */
   getItems() {
     return this.inventory.filter(item => !!item).reverse();
+  }
+
+  /**
+   * Determine if a building is powered.
+   * @returns {Boolean}
+   */
+  isPowered() {
+    return this.requiresPower
+      ? this.poweredBy.length > 0
+      : true;
   }
 }
 

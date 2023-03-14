@@ -13,11 +13,7 @@ class SharedBehavior extends Behavior {
     return super.add(building, {
       // setting a cooldown will prevent other behaviors from
       // activating until the cooldown has expired
-      cooldown: 0,
-
-      // buildings that require power and are not powered will
-      // prevent other behaviors from activating
-      poweredBy: []
+      cooldown: 0
     });
   }
 
@@ -41,8 +37,6 @@ class SharedBehavior extends Behavior {
         shared.cooldown = 0;
       }
     }
-
-    shared.isPowered = shared.poweredBy.length > 0;
   }
 }
 

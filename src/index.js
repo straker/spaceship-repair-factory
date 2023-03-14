@@ -1,15 +1,17 @@
 import init from './init.js';
-import { GameLoop, imageAssets } from './libs/kontra.js';
+import { GameLoop, imageAssets, onInput } from './libs/kontra.js';
 import grid from './utils/grid.js';
 import { behaviors, giveBehavior } from './behaviors/index.js';
-import { GRID_SIZE } from './constants.js';
+import { GRID_SIZE, TYPES } from './constants.js';
 import Building from './building.js';
+import { buildings } from './data/buildings.js';
 import { _items } from './item.js';
 import ImageButton from './ui/image-button.js';
 import buildingPopup from './ui/building-popup.js';
+import { toGrid } from './utils/index.js';
 
 async function main() {
-  const { canvas, context } = await init();
+  const { canvas, context, pointer } = await init();
 
   // const imgBtn = new ImageButton({
   //   x: 100,
@@ -20,11 +22,23 @@ async function main() {
   //   onDown() {}
   // });
 
+  window.cursor = new Building(null, {
+    x: 0,
+    y: 0,
+    width: GRID_SIZE,
+    height: GRID_SIZE,
+    row: 0,
+    col: 0,
+    hidden: true,
+    allowRotation: true,
+  });
+
   GameLoop({
     // fps: 15,
     update(dt) {
       behaviors.shared.run(dt);
       behaviors.generatePower.run(dt);
+      behaviors.consumePower.run(dt);
       behaviors.spawnItem.run(dt);
       behaviors.takeItem.run(dt);
       behaviors.putItem.run(dt);
@@ -33,6 +47,11 @@ async function main() {
       grid.update();
       _items.forEach(item => item.update());
       // buildingPopup.update();
+
+      cursor.row = toGrid(pointer.y);
+      cursor.col = toGrid(pointer.x);
+      cursor.x = cursor.col * GRID_SIZE;
+      cursor.y = cursor.row * GRID_SIZE;
     },
     render() {
       grid.render();
@@ -54,8 +73,71 @@ async function main() {
         }
         context.stroke();
       }
+
+      if (!cursor.hidden) {
+        cursor.render();
+      }
     }
   }).start();
+
+  function setCursor(name) {
+    if (!name) {
+      cursor.hidden = true;
+      return;
+    }
+
+    cursor.hidden = false;
+    cursor.image = null
+    cursor.animations = null;
+    cursor.buildingName = name;
+
+    const building = buildings[name];
+    if (building.image) {
+      cursor.image = building.image;
+      cursor.width = building.image.width;
+      cursor.height = building.image.height;
+      return;
+    }
+
+    if (building.animations.cursor) {
+      cursor.animations = building.animations;
+      cursor.playAnimation('cursor');
+      cursor.width = cursor.currentAnimation.width;
+      cursor.height = cursor.currentAnimation.height;
+    }
+  }
+
+  onInput(['1'], () => {
+    setCursor('Belt I');
+  });
+  onInput(['2'], () => {
+    setCursor('Arm');
+  });
+  onInput(['3'], () => {
+    setCursor('Thermoelectric Generator');
+  });
+  onInput(['4'], () => {
+    setCursor('Extractor I');
+  });
+  onInput(['5'], () => {
+    setCursor('Assembler I');
+  });
+  onInput('esc', () => {
+    setCursor(null);
+  });
+  onInput('r', () => {
+    cursor.facing = (cursor.facing + Math.PI / 2) % (Math.PI * 2);
+  }, { key: { preventDefault: false }});
+
+  onInput('down', () => {
+    if (!grid.getByType(cursor, TYPES.building).length) {
+      new Building(cursor.buildingName, {
+        row: cursor.row,
+        col: cursor.col,
+        rotation: cursor.facing
+      });
+    }
+  });
 
   window.DEBUG = true
   window.blds = [];
@@ -98,8 +180,8 @@ async function main() {
     col: 10
   });
   window.power2 = new Building('Thermoelectric Generator', {
-    row: 12,
-    col: 10
+    row: 4,
+    col: 12
   });
 
   window.assembler = new Building('Assembler I', {

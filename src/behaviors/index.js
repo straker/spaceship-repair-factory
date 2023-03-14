@@ -1,3 +1,4 @@
+import consumePowerBehavior from './consume-power.js';
 import craftItemBehavior from './craft-item.js';
 import generatePowerBehavior from './generate-power.js';
 import putItemBehavior from './put-item.js';
@@ -7,6 +8,7 @@ import takeItemBehavior from './take-item.js';
 import transportItemBehavior from './transport-item.js';
 
 export const behaviors = {
+  consumePower: consumePowerBehavior,
   craftItem: craftItemBehavior,
   generatePower: generatePowerBehavior,
   putItem: putItemBehavior,

@@ -55,11 +55,11 @@ export default class Behavior {
   run(dt) {
     this.buildings.forEach(building => {
       const shared = building.behaviors.shared[0];
-      if (shared.cooldown) {
-        return;
-      }
-
-      if (building.requiredPower && !shared.isPowered) {
+      if (
+        shared.cooldown ||
+        // unpowered buildings do not run behaviors
+        !building.isPowered()
+      ) {
         return;
       }
 

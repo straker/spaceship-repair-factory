@@ -55,7 +55,7 @@ class TakeItemBehavior extends Behavior {
 
       // make the behavior smart by not taking items that the
       // building to place into does not accept
-      if (building.behaviors.putItem.length && !toBuilding.canAddItem(item)) {
+      if (building.behaviors.putItem.length && toBuilding && !toBuilding.canAddItem(item)) {
         continue;
       }
 
