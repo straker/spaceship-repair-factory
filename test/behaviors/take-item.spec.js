@@ -64,14 +64,14 @@ describe('behaviors.take-item', () => {
 
     it('should take item from previous building', () => {
       fromBuilding.inventory = [['Iron', 5]];
-      takeItemBehavior._behavior(building, 1);
+      takeItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, [['Iron', 1]]);
     });
 
     it('should remove the item from the previous building', () => {
       fromBuilding.inventory = [['Iron', 5]];
       building.inventory = [['Iron', 5]];
-      takeItemBehavior._behavior(building, 1);
+      takeItemBehavior.behavior(building, 1);
       assert.deepEqual(fromBuilding.inventory, [['Iron', 4]]);
     });
 
@@ -82,25 +82,25 @@ describe('behaviors.take-item', () => {
       ];
       building.inventorySlots = 1;
       building.inventory = [['Iron', 5]];
-      takeItemBehavior._behavior(building, 1);
+      takeItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, [['Iron', 6]]);
     });
 
     it('should not take item when timer is below rate', () => {
       fromBuilding.inventory = [['Iron', 5]];
-      takeItemBehavior._behavior(building, 0.2);
+      takeItemBehavior.behavior(building, 0.2);
       assert.deepEqual(building.inventory, []);
     });
 
     it('should not take if there is no building', () => {
       grid.remove(fromBuilding);
       fromBuilding.inventory = [['Iron', 5]];
-      takeItemBehavior._behavior(building, 1);
+      takeItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, []);
     });
 
     it('should not take if previous building does not have inventory', () => {
-      takeItemBehavior._behavior(building, 1);
+      takeItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, []);
     });
 
@@ -110,7 +110,7 @@ describe('behaviors.take-item', () => {
         ['Iron Ore', 5]
       ];
       building.inventory = [['Iron', 5]];
-      takeItemBehavior._behavior(building, 1);
+      takeItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, [
         ['Iron', 5],
         ['Iron Ore', 1]
@@ -121,7 +121,7 @@ describe('behaviors.take-item', () => {
       fromBuilding.inventory = [['Iron', 5]];
       takeItemBehavior.add(building, { rate: 1, amount: 10 });
       building.inventory = [['Iron', 5]];
-      takeItemBehavior._behavior(building, 1);
+      takeItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, [['Iron', 10]]);
     });
 
@@ -130,7 +130,7 @@ describe('behaviors.take-item', () => {
       takeItemBehavior.add(building, { rate: 1, amount: 10 });
       building.inventorySlots = 1;
       building.inventory = [['foo', 7]];
-      takeItemBehavior._behavior(building, 1);
+      takeItemBehavior.behavior(building, 1);
       assert.deepEqual(fromBuilding.inventory, [['foo', 2]]);
       assert.deepEqual(building.inventory, [['foo', 10]]);
     });

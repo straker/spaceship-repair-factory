@@ -121,7 +121,7 @@ describe('behaviors.craft-item', () => {
           ['foo', 5],
           ['fooOre', 1]
         ];
-        craftItemBehavior._behavior(building, 1);
+        craftItemBehavior.behavior(building, 1);
         assert.deepEqual(building.inputs, [
           ['foo', 0],
           ['fooOre', 0]
@@ -133,7 +133,7 @@ describe('behaviors.craft-item', () => {
           ['foo', 5],
           ['fooOre', 1]
         ];
-        craftItemBehavior._behavior(building, 1);
+        craftItemBehavior.behavior(building, 1);
         assert.deepEqual(building.outputs, [
           ['fooBar', 1],
           ['fooSlag', 5]
@@ -149,7 +149,7 @@ describe('behaviors.craft-item', () => {
           ['fooBar', MAX_CRAFT_STORAGE],
           ['fooSlag', 5 * MAX_CRAFT_STORAGE]
         ];
-        craftItemBehavior._behavior(building, 1);
+        craftItemBehavior.behavior(building, 1);
         assert.deepEqual(building.outputs, [
           ['fooBar', MAX_CRAFT_STORAGE],
           ['fooSlag', 5 * MAX_CRAFT_STORAGE]
@@ -165,7 +165,7 @@ describe('behaviors.craft-item', () => {
           ['fooBar', MAX_CRAFT_STORAGE],
           ['fooSlag', 5 * MAX_CRAFT_STORAGE]
         ];
-        craftItemBehavior._behavior(building, 1);
+        craftItemBehavior.behavior(building, 1);
         assert.deepEqual(building.inventory, []);
       });
 
@@ -175,7 +175,7 @@ describe('behaviors.craft-item', () => {
           ['foo', 5],
           ['fooOre', 1]
         ];
-        craftItemBehavior._behavior(building, 1);
+        craftItemBehavior.behavior(building, 1);
         assert.deepEqual(building.outputs, []);
       });
 
@@ -184,7 +184,7 @@ describe('behaviors.craft-item', () => {
           ['foo', 5],
           ['fooOre', 1]
         ];
-        craftItemBehavior._behavior(building, 0.2);
+        craftItemBehavior.behavior(building, 0.2);
         assert.deepEqual(building.inputs, [
           ['foo', 0],
           ['fooOre', 0]
@@ -200,8 +200,8 @@ describe('behaviors.craft-item', () => {
           ['foo', 10],
           ['fooOre', 2]
         ];
-        craftItemBehavior._behavior(building, 0.2);
-        craftItemBehavior._behavior(building, 0.2);
+        craftItemBehavior.behavior(building, 0.2);
+        craftItemBehavior.behavior(building, 0.2);
         assert.deepEqual(building.inputs, [
           ['foo', 5],
           ['fooOre', 1]
@@ -217,7 +217,7 @@ describe('behaviors.craft-item', () => {
           ['foo', 10],
           ['fooOre', 2]
         ];
-        craftItemBehavior._behavior(building, 0.75);
+        craftItemBehavior.behavior(building, 0.75);
         assert.equal(building.behaviors.craftItem.dt, 0);
         assert.isFalse(building.crafting);
       });
@@ -228,7 +228,7 @@ describe('behaviors.craft-item', () => {
           ['foo', 5],
           ['fooOre', 1]
         ];
-        craftItemBehavior._behavior(building, 0.25);
+        craftItemBehavior.behavior(building, 0.25);
         assert.deepEqual(building.outputs, [
           ['fooBar', 1],
           ['fooSlag', 5]
@@ -245,7 +245,7 @@ describe('behaviors.craft-item', () => {
             ['foo', 20],
             ['fooOre', 20]
           ];
-          craftItemBehavior._behavior(building, 1);
+          craftItemBehavior.behavior(building, 1);
           assert.deepEqual(building.inventory, [
             ['foo', 15],
             ['fooOre', 19]
@@ -265,7 +265,7 @@ describe('behaviors.craft-item', () => {
             ['foo', 20],
             ['fooOre', 20]
           ];
-          craftItemBehavior._behavior(building, 1);
+          craftItemBehavior.behavior(building, 1);
           assert.deepEqual(building.inputs, [
             ['foo', 0],
             ['fooOre', 0]
@@ -295,7 +295,7 @@ describe('behaviors.craft-item', () => {
             ['fooBar', MAX_CRAFT_STORAGE],
             ['fooSlag', 5 * MAX_CRAFT_STORAGE]
           ];
-          craftItemBehavior._behavior(building, 1);
+          craftItemBehavior.behavior(building, 1);
           assert.deepEqual(building.inventory, [
             ['fooBar', 1],
             ['fooSlag', 5]
@@ -311,7 +311,7 @@ describe('behaviors.craft-item', () => {
             ['fooBar', MAX_CRAFT_STORAGE - 1],
             ['fooSlag', 5 * MAX_CRAFT_STORAGE - 3]
           ];
-          craftItemBehavior._behavior(building, 1);
+          craftItemBehavior.behavior(building, 1);
           assert.deepEqual(building.outputs, [
             ['fooBar', MAX_CRAFT_STORAGE],
             ['fooSlag', 5 * MAX_CRAFT_STORAGE]

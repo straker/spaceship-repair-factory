@@ -1,4 +1,4 @@
-import { getContext, Text, Grid, Button, on, getWorldRect } from '../libs/kontra.js';
+import { getContext, Text, Grid, Button, onInput, getWorldRect } from '../libs/kontra.js';
 import {
   COLORS,
   GRID_SIZE,
@@ -42,33 +42,38 @@ const buildingPopup = {
       height: GRID_SIZE * 2,
       text: {
         ...textProps,
+        color: COLORS.black,
+        x: -GRID_SIZE,
+        y: GRID_SIZE / 2,
         text: 'Close'
       },
-      scaleX: 0.4,
-      scaleY: 0.4,
+      // scaleX: 0.4,
+      // scaleY: 0.4,
       onDown() {
         buildingPopup.hide();
       }
     });
     popupGrid = Grid({
       flow: 'grid',
-      rowGap: [GRID_SIZE / 2, GRID_SIZE],
-      colGap: GRID_SIZE
+      rowGap: GRID_SIZE * 1.5,
+      colGap: GRID_SIZE * 1.1
     });
     recipeGrid = Grid({
       flow: 'grid',
       numCols: 5,
       align: 'center',
       rowGap: GRID_SIZE / 2,
-      colGap: GRID_SIZE
+      colGap: GRID_SIZE / 2
     });
 
-    on('esc', () => {
+    onInput(['esc'], () => {
       this.hide();
     });
   },
 
   show(building, hasClose = true) {
+    if (!this.hidden) return;
+
     this.for = building;
     this.hidden = false;
     // this.menuType = building.menuType;
@@ -118,13 +123,23 @@ const buildingPopup = {
           colSpan: popupGrid.numCols,
           text: 'Recipe:'
         });
-        let components = Object.entries(recipes).map(([,recipe]) => {
+        const allowedRecipes = Object.entries(recipes)
+          .filter(([,recipe]) => recipe.craftedBy && recipe.craftedBy.includes(building.id));
+        let components = allowedRecipes.map(([,recipe]) => {
           return new ImageButton({
             name: recipe.name,
             width: GRID_SIZE,
             height: GRID_SIZE,
-            selected: recipe.name === building.recipe.name,
+            text: {
+              text: recipe.name,
+              width: GRID_SIZE * 1.1,
+              y: GRID_SIZE * 1.5,
+              ...textProps
+            },
+            selected: recipe.name === building.recipe?.name,
             onDown() {
+              // TODO: do not allow selecting the same recipe that is already selected
+              recipeGrid.children.forEach(child => child.destroy?.());
               building.setRecipe(recipe);
               recipeGrid.children = getRecipe(recipe);
               components.forEach(component => (component.selected = false));
@@ -147,7 +162,7 @@ const buildingPopup = {
       padding * 1.5 + GRID_SIZE * 1.5 + (!popupGrid.hidden ? bodyHeight : 0);
 
     let rect = getWorldRect(building);
-    let sx = building.col ? (building.col + 2) * GRID_SIZE : rect.x;
+    let sx = building.col ? (building.col + building.gridWidth + 2) * GRID_SIZE : rect.x;
     let sy = building.row
       ? (building.row - 0.5) * GRID_SIZE
       : rect.y + GRID_SIZE / 2;
@@ -156,7 +171,7 @@ const buildingPopup = {
     this.y =
       sy + this.height < GAME_HEIGHT
         ? sy
-        : sy - this.height + GRID_SIZE * GRID_SIZE * 0.5;
+        : sy - this.height / 2;
     // if (this.menuType === TYPES.INFO) {
     //   this.y -= GRID_SIZE * 2.5;
     // } else if (this.menuType === TYPES.TIP) {
@@ -189,6 +204,9 @@ const buildingPopup = {
 
   hide() {
     this.hidden = true;
+    popupGrid.children.forEach(child => child.destroy?.());
+    recipeGrid.children.forEach(child => child.destroy?.());
+    closeBtn.destroy();
   },
 
   update() {
@@ -251,6 +269,8 @@ const buildingPopup = {
 export default buildingPopup;
 
 function getRecipe(recipe) {
+  if (!recipe) return [];
+
   recipeName.text = recipe.name;
 
   let inputs =
@@ -258,22 +278,26 @@ function getRecipe(recipe) {
       let btn = new ImageButton({
         name,
         width: GRID_SIZE,
-        height: GRID_SIZE
+        height: GRID_SIZE,
+        text: {
+          text: name,
+          ...textProps
+        }
       });
 
-      // if (amount) {
+      if (amount) {
         btn.addChild(
           Text({
             ...textProps,
             font: '12px Arial',
             anchor: { x: 0.5, y: 0 },
             strokeColor: COLORS.black,
-            x: GRID_SIZE - 4,
-            y: GRID_SIZE * 1.75,
-            text: `0/${amount}`
+            x: GRID_SIZE / 2,
+            y: GRID_SIZE * 1.5,
+            text: `0/${amount}`,
           })
         );
-      // }
+      }
 
       return btn;
     }) ?? [];
@@ -282,6 +306,7 @@ function getRecipe(recipe) {
     ...textProps,
     font: '18px Arial',
     anchor: { x: 0.5, y: 0.5 },
+    width: GRID_SIZE,
     text: '→'
   });
   if (recipe.time) {
@@ -290,8 +315,7 @@ function getRecipe(recipe) {
       font: '12px Arial',
       anchor: { x: 0.5, y: 0 },
       strokeColor: COLORS.black,
-      x: GRID_SIZE - 12,
-      y: GRID_SIZE - 4,
+      y: GRID_SIZE / 2,
       text: recipe.time.toFixed(1) + 's'
     });
     arrow.addChild(time);
@@ -303,23 +327,27 @@ function getRecipe(recipe) {
     recipe.outputs?.map(([ name, amount ]) => {
       let btn = new ImageButton({
         name,
+        text: {
+          text: name,
+          ...textProps
+        },
         width: GRID_SIZE,
         height: GRID_SIZE
       });
 
-      // if (amount) {
+      if (amount) {
         btn.addChild(
           Text({
             ...textProps,
             font: '12px Arial',
             anchor: { x: 0.5, y: 0 },
             strokeColor: COLORS.black,
-            x: GRID_SIZE - 4,
-            y: GRID_SIZE * 1.75,
+            x: GRID_SIZE / 2,
+            y: GRID_SIZE * 1.5,
             text: `0/${amount}`
           })
         );
-      // }
+      }
 
       return btn;
     }) ?? [];

@@ -13,7 +13,7 @@ export const recipes = {};
  */
 export async function initItems() {
   const data = await loadData('/src/data/items.csv');
-  const metaEndCol = 4;
+  const metaEndCol = 5;
   const parsedData = CSV.parse(data);
 
   const itemNames = parsedData[0].filter(
@@ -30,6 +30,7 @@ export async function initItems() {
       const stackSize = parseInt(cells[2]);
       const output = parseInt(cells[3]);
       const time = parseFloat(cells[4]);
+      const craftedBy = cells[5] ? JSON.parse(cells[5]) : [];
 
       // TODO: how to determine when items are available?
       // need to be tied to the research tree
@@ -48,8 +49,9 @@ export async function initItems() {
       // need to be tied to the research tree
       createRecipe(name, {
         enabled: true,
-        outputs: [[name, output]],
         time,
+        craftedBy,
+        outputs: [[name, output]],
         inputs: cells.reduce((inputs, cell, index) => {
           const value = parseInt(cell);
 
@@ -140,8 +142,10 @@ function createRecipe(name, props) {
     recipes[name] = addModChanges(recipes[name], props);
   } else {
     recipes[name] = {
+      id: name,
       get name() {
-        return i18n(name);
+        // return i18n(name);
+        return name;
       },
       ...props
     };

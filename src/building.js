@@ -18,7 +18,7 @@ export default class Building extends GameObject {
     const defaultDir = (props.defaultDir ? degToRad(props.defaultDir) : 0);
     let facing = properties.facing ?? properties.rotation;
     if (facing) {
-      facing += defaultDir;
+      facing = (facing + defaultDir) % (Math.PI * 2);
     }
     else {
       facing = defaultDir;
@@ -28,7 +28,7 @@ export default class Building extends GameObject {
       allowRotation: !props.animations || !props.animations['90'],
       ...props,
       ...properties,
-      _name: name,
+      id: name,
       defaultDir,
       facing,
       type: TYPES.building + (TYPES[type] ? TYPES[type] : 0),
@@ -48,11 +48,6 @@ export default class Building extends GameObject {
 
     // give every building the shared behavior
     giveBehavior('shared', this);
-
-    // emit events before adding other behaviors so those
-    // behaviors don't trigger events
-    emit('building:placed', this);
-
     behaviors.forEach(([name, options]) => {
       giveBehavior(name, this, options);
 
@@ -71,7 +66,9 @@ export default class Building extends GameObject {
         this.animations = this._spriteSheet.animations;
       }
     });
+
     grid.add(this);
+    emit('building:placed', this);
 
     // auto-play directional animations
     if (this.animations && this.animations[radToDeg(this.facing)]) {
@@ -80,7 +77,7 @@ export default class Building extends GameObject {
   }
 
   get name() {
-    return i18n(this._name);
+    return i18n(this.id);
   }
 
   // do not allow setting rotation so we don't rotate the

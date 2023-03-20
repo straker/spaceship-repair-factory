@@ -39,23 +39,23 @@ describe('behaviors.spawn-item', () => {
     });
 
     it('should add item to inventory', () => {
-      spawnItemBehavior._behavior(building, 1);
+      spawnItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, [['Iron', 1]]);
     });
 
     it('should not add item when timer is below rate', () => {
-      spawnItemBehavior._behavior(building, 0.2);
+      spawnItemBehavior.behavior(building, 0.2);
       assert.deepEqual(building.inventory, []);
     });
 
     it('should add items for each interval above rate', () => {
-      spawnItemBehavior._behavior(building, 2);
+      spawnItemBehavior.behavior(building, 2);
       assert.deepEqual(building.inventory, [['Iron', 2]]);
     });
 
     it('should add items for each behavior', () => {
       spawnItemBehavior.add(building, { item: 'Iron Ore', rate: 1, amount: 1 });
-      spawnItemBehavior._behavior(building, 1);
+      spawnItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, [
         ['Iron', 1],
         ['Iron Ore', 1]
@@ -65,7 +65,7 @@ describe('behaviors.spawn-item', () => {
     it('should not add item when no item is selected', () => {
       behavior.remove();
       spawnItemBehavior.add(building, { rate: 1, amount: 1 });
-      spawnItemBehavior._behavior(building, 1);
+      spawnItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, []);
     });
   });

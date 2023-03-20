@@ -10,6 +10,9 @@ export default class GameObject extends SpriteClass {
 
     // down is the default direction
     properties.dir = DIRS[properties.facing ?? 0];
+    if (!properties.dir) {
+      debugger;
+    }
 
     if (properties.x !== undefined) {
       properties.row = toGrid(properties.y);
@@ -29,6 +32,7 @@ export default class GameObject extends SpriteClass {
     };
     this.center.row = toGrid(this.center.y);
     this.center.col = toGrid(this.center.x);
-
+    this.gridWidth = toGrid(this.width);
+    this.gridHeight = toGrid(this.height);
   }
 }

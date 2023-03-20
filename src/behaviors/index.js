@@ -1,5 +1,6 @@
 import consumePowerBehavior from './consume-power.js';
 import craftItemBehavior from './craft-item.js';
+import destroyItemBehavior from './destroy-item.js';
 import generatePowerBehavior from './generate-power.js';
 import putItemBehavior from './put-item.js';
 import sharedBehavior from './shared.js';
@@ -7,9 +8,10 @@ import spawnItemBehavior from './spawn-item.js';
 import takeItemBehavior from './take-item.js';
 import transportItemBehavior from './transport-item.js';
 
-export const behaviors = {
+const behaviors = {
   consumePower: consumePowerBehavior,
   craftItem: craftItemBehavior,
+  destroyItem: destroyItemBehavior,
   generatePower: generatePowerBehavior,
   putItem: putItemBehavior,
   shared: sharedBehavior,
@@ -17,6 +19,20 @@ export const behaviors = {
   takeItem: takeItemBehavior,
   transportItem: transportItemBehavior
 };
+
+// TODO: let this list be editable by mods
+const defaultBehaviorOrder = [
+  'shared',
+  'generatePower',
+  'consumePower',
+  'destroyItem',
+  'spawnItem',
+  'takeItem',
+  'putItem',
+  'craftItem',
+  'transportItem'
+];
+export const behaviorOrder = defaultBehaviorOrder.map(name => behaviors[name]);
 
 /**
  * Give a behavior to an building.

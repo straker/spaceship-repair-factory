@@ -25,11 +25,11 @@ function fillCricle(building, radius) {
   building.context.arc(building.center.x, building.center.y, (r) * GRID_SIZE, 0, Math.PI*2);
   building.context.stroke();
 
-  building.context.fillStyle = 'yellow';
-  building.context.globalAlpha = 0.5;
-  tiles.forEach(({row, col}) => {
-    building.context.fillRect((col + building.col) * GRID_SIZE, (row + building.row) * GRID_SIZE, GRID_SIZE, GRID_SIZE);
-  });
+  // building.context.fillStyle = 'yellow';
+  // building.context.globalAlpha = 0.3;
+  // tiles.forEach(({row, col}) => {
+  //   building.context.fillRect((col + building.col) * GRID_SIZE, (row + building.row) * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+  // });
   building.context.restore();
 }
 
@@ -134,6 +134,8 @@ const generatePowerProperties = {
    * @param {Building} building - Building to check.
    */
   onBuildingPlaced(building) {
+    if (building === this) return;
+
     const { radius } = this.behaviors.generatePower[0];
 
     let isPowered = false;

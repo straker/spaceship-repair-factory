@@ -64,14 +64,14 @@ describe('behaviors.put-item', () => {
 
     it('should put item to next building', () => {
       building.inventory = [['Iron', 5]];
-      putItemBehavior._behavior(building, 1);
+      putItemBehavior.behavior(building, 1);
       assert.deepEqual(toBuilding.inventory, [['Iron', 1]]);
     });
 
     it('should remove the item from the building', () => {
       building.inventory = [['Iron', 5]];
       toBuilding.inventory = [['Iron', 5]];
-      putItemBehavior._behavior(building, 1);
+      putItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, [['Iron', 4]]);
     });
 
@@ -82,25 +82,25 @@ describe('behaviors.put-item', () => {
       ];
       toBuilding.inventorySlots = 1;
       toBuilding.inventory = [['Iron', 5]];
-      putItemBehavior._behavior(building, 1);
+      putItemBehavior.behavior(building, 1);
       assert.deepEqual(toBuilding.inventory, [['Iron', 6]]);
     });
 
     it('should not put item when timer is below rate', () => {
       building.inventory = [['Iron', 5]];
-      putItemBehavior._behavior(building, 0.2);
+      putItemBehavior.behavior(building, 0.2);
       assert.deepEqual(toBuilding.inventory, []);
     });
 
     it('should not put if there is no building', () => {
       grid.remove(toBuilding);
       building.inventory = [['Iron', 5]];
-      putItemBehavior._behavior(building, 1);
+      putItemBehavior.behavior(building, 1);
       assert.deepEqual(toBuilding.inventory, []);
     });
 
     it('should not put if building does not have inventory', () => {
-      putItemBehavior._behavior(building, 1);
+      putItemBehavior.behavior(building, 1);
       assert.deepEqual(toBuilding.inventory, []);
     });
 
@@ -110,7 +110,7 @@ describe('behaviors.put-item', () => {
         ['Iron Ore', 5]
       ];
       toBuilding.inventory = [['Iron', 5]];
-      putItemBehavior._behavior(building, 1);
+      putItemBehavior.behavior(building, 1);
       assert.deepEqual(toBuilding.inventory, [
         ['Iron', 5],
         ['Iron Ore', 1]
@@ -121,7 +121,7 @@ describe('behaviors.put-item', () => {
       building.inventory = [['Iron', 5]];
       putItemBehavior.add(building, { rate: 1, amount: 10 });
       toBuilding.inventory = [['Iron', 5]];
-      putItemBehavior._behavior(building, 1);
+      putItemBehavior.behavior(building, 1);
       assert.deepEqual(toBuilding.inventory, [['Iron', 10]]);
     });
 
@@ -130,7 +130,7 @@ describe('behaviors.put-item', () => {
       putItemBehavior.add(building, { rate: 1, amount: 10 });
       toBuilding.inventorySlots = 1;
       toBuilding.inventory = [['foo', 7]];
-      putItemBehavior._behavior(building, 1);
+      putItemBehavior.behavior(building, 1);
       assert.deepEqual(building.inventory, [['foo', 2]]);
       assert.deepEqual(toBuilding.inventory, [['foo', 10]]);
     });

@@ -143,6 +143,7 @@ const craftingProperties = {
    * @param {Object} recipe
    */
   setRecipe(recipe) {
+    // TODO: what should happen to the buildings current input and outputs? right now the items that were produced magically disappear, which I'm not sure is the best approach
     this.inputs = [];
     this.outputs = [];
 

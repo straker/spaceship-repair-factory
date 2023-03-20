@@ -1,14 +1,15 @@
 import init from './init.js';
 import { GameLoop, imageAssets, onInput } from './libs/kontra.js';
 import grid from './utils/grid.js';
-import { behaviors, giveBehavior } from './behaviors/index.js';
+import { behaviorOrder, giveBehavior } from './behaviors/index.js';
 import { GRID_SIZE, TYPES } from './constants.js';
 import Building from './building.js';
 import { buildings } from './data/buildings.js';
+import { recipes } from './data/items.js';
 import { _items } from './item.js';
 import ImageButton from './ui/image-button.js';
 import buildingPopup from './ui/building-popup.js';
-import { toGrid } from './utils/index.js';
+import { toGrid, getDimensions } from './utils/index.js';
 
 async function main() {
   const { canvas, context, pointer } = await init();
@@ -22,6 +23,7 @@ async function main() {
   //   onDown() {}
   // });
 
+  buildingPopup.init();
   window.cursor = new Building(null, {
     x: 0,
     y: 0,
@@ -36,17 +38,10 @@ async function main() {
   GameLoop({
     // fps: 15,
     update(dt) {
-      behaviors.shared.run(dt);
-      behaviors.generatePower.run(dt);
-      behaviors.consumePower.run(dt);
-      behaviors.spawnItem.run(dt);
-      behaviors.takeItem.run(dt);
-      behaviors.putItem.run(dt);
-      behaviors.craftItem.run(dt);
-      behaviors.transportItem.run(dt);
+      behaviorOrder.forEach(behavior => behavior.run(dt));
       grid.update();
       _items.forEach(item => item.update());
-      // buildingPopup.update();
+      buildingPopup.update();
 
       cursor.row = toGrid(pointer.y);
       cursor.col = toGrid(pointer.x);
@@ -57,7 +52,7 @@ async function main() {
       grid.render();
       _items.forEach(item => item.render());
       // imgBtn.render();
-      // buildingPopup.render();
+      buildingPopup.render();
 
       if (window.DEBUG) {
         context.strokeStyle = 'grey';
@@ -81,15 +76,15 @@ async function main() {
   }).start();
 
   function setCursor(name) {
-    if (!name) {
-      cursor.hidden = true;
-      return;
-    }
-
     cursor.hidden = false;
     cursor.image = null
     cursor.animations = null;
     cursor.buildingName = name;
+
+    if (!name) {
+      cursor.hidden = true;
+      return;
+    }
 
     const building = buildings[name];
     if (building.image) {
@@ -108,19 +103,27 @@ async function main() {
   }
 
   onInput(['1'], () => {
+    // dont rotate the belt cursor but instead show the
+    // appropriate animation rotation (how?)
     setCursor('Belt I');
   });
   onInput(['2'], () => {
     setCursor('Arm');
   });
   onInput(['3'], () => {
-    setCursor('Thermoelectric Generator');
+    setCursor('Power I');
   });
   onInput(['4'], () => {
     setCursor('Extractor I');
   });
   onInput(['5'], () => {
     setCursor('Assembler I');
+  });
+  onInput(['6'], () => {
+    setCursor('Storage');
+  });
+  onInput(['7'], () => {
+    setCursor('Furnace I');
   });
   onInput('esc', () => {
     setCursor(null);
@@ -130,16 +133,34 @@ async function main() {
   }, { key: { preventDefault: false }});
 
   onInput('down', () => {
-    if (!grid.getByType(cursor, TYPES.building).length) {
-      new Building(cursor.buildingName, {
-        row: cursor.row,
-        col: cursor.col,
-        rotation: cursor.facing
-      });
+
+    // select building
+    if (!cursor.buildingName) {
+      const building = grid.getByType(cursor, TYPES.building)[0];
+      if (building?.setRecipe) {
+        buildingPopup.show(building);
+        return;
+      }
     }
+
+    // place building
+    const { startRow, startCol, endRow, endCol } = getDimensions(cursor);
+    for (let row = startRow; row <= endRow; row++) {
+      for (let col = startCol; col <= endCol; col++) {
+        if (grid.getByType({ row, col }, TYPES.building)[0]) {
+          return;
+        }
+      }
+    }
+
+    new Building(cursor.buildingName, {
+      row: cursor.row,
+      col: cursor.col,
+      rotation: cursor.facing
+    });
   });
 
-  window.DEBUG = true
+  // window.DEBUG = true
   window.blds = [];
   window.extractor = new Building('Extractor I', {
     id: 1,
@@ -147,42 +168,42 @@ async function main() {
     row: 4,
     // rotation: Math.PI*3/2
   });
-  const length = 3;
+  const length = 30;
   for (let i = 0; i < length; i++) {
-    blds.push(new Building('Belt I', {
-      id: i,
-      col: 5+i,
-      row: 6,
-      rotation: 0
-    }));
-    blds.push(new Building('Belt I', {
-      id: i+length,
-      col: 5,
-      row: 3+i,
-      rotation: Math.PI/2
-    }));
-    blds.push(new Building('Belt I', {
-      id: i+length*2,
-      col: 6+i,
-      row: 3,
-      rotation: Math.PI
-    }));
-    blds.push(new Building('Belt I', {
-      id: i+length*3,
-      col: 8,
-      row: 4+i,
-      rotation: Math.PI*3/2
-    }));
+    // blds.push(new Building('Belt I', {
+    //   id: i,
+    //   col: 5+i,
+    //   row: 6,
+    //   rotation: 0
+    // }));
+    // blds.push(new Building('Belt I', {
+    //   id: i+length,
+    //   col: 5,
+    //   row: 3+i,
+    //   rotation: Math.PI/2
+    // }));
+    // blds.push(new Building('Belt I', {
+    //   id: i+length*2,
+    //   col: 6+i,
+    //   row: 3,
+    //   rotation: Math.PI
+    // }));
+    // blds.push(new Building('Belt I', {
+    //   id: i+length*3,
+    //   col: 8,
+    //   row: 4+i,
+    //   rotation: Math.PI*3/2
+    // }));
   }
 
-  window.power = new Building('Thermoelectric Generator', {
+  window.power = new Building('Power I', {
     row: 9,
     col: 10
   });
-  window.power2 = new Building('Thermoelectric Generator', {
-    row: 4,
-    col: 12
-  });
+  // window.power2 = new Building('Power I', {
+  //   row: 4,
+  //   col: 12
+  // });
 
   window.assembler = new Building('Assembler I', {
     row: 14,

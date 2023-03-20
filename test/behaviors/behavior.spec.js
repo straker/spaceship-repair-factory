@@ -17,7 +17,7 @@ describe('behavior', () => {
     building = null;
 
     behavior.buildings = [];
-    behavior._behavior.restore?.();
+    behavior.behavior.restore?.();
 
     delete buildings.foo;
   });
@@ -106,7 +106,7 @@ describe('behavior', () => {
     it('should call the behavior for a building', () => {
       const building = new Building('foo');
       behavior.add(building);
-      const spy = sinon.spy(behavior, '_behavior');
+      const spy = sinon.spy(behavior, 'behavior');
       behavior.run(0.2);
       assert.isTrue(spy.calledWith(building, 0.2));
     });
@@ -116,7 +116,7 @@ describe('behavior', () => {
       const otherBuilding = new Building('foo');
       behavior.add(building);
       behavior.add(otherBuilding);
-      const spy = sinon.spy(behavior, '_behavior');
+      const spy = sinon.spy(behavior, 'behavior');
       behavior.run(0.2);
 
       assert.isTrue(spy.calledWith(building, 0.2));
