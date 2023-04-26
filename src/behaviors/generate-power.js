@@ -12,7 +12,7 @@ import { TYPES, GRID_SIZE } from '../constants.js';
 import { on, off } from '../libs/kontra.js';
 import { getState, setState } from '../state.js';
 
-function fillCricle(building, radius) {
+export function showRadius(building, radius) {
   const tiles = getTilesInCircle({
     y: building.center.y - building.y,
     x: building.center.x - building.x
@@ -87,9 +87,9 @@ class GeneratePowerBehavior extends Behavior {
       const { input, radius } = generatePower;
 
       render();
-      if (window.DEBUG) {
-        fillCricle(building, radius);
-      }
+      // if (window.DEBUG) {
+        showRadius(building, radius);
+      // }
     };
 
     return super.add(building, {

@@ -2,7 +2,7 @@ import init from './init.js';
 import { GameLoop, imageAssets, onInput } from './libs/kontra.js';
 import grid from './utils/grid.js';
 import { behaviorOrder, giveBehavior } from './behaviors/index.js';
-import { GRID_SIZE, TYPES } from './constants.js';
+import { GRID_SIZE, TYPES, COLORS } from './constants.js';
 import Building from './building.js';
 import { buildings } from './data/buildings.js';
 import { recipes } from './data/items.js';
@@ -10,6 +10,9 @@ import { _items } from './item.js';
 import ImageButton from './ui/image-button.js';
 import buildingPopup from './ui/building-popup.js';
 import { toGrid, getDimensions } from './utils/index.js';
+import { showRadius } from './behaviors/generate-power.js';
+
+// window.DEBUG = true
 
 async function main() {
   const { canvas, context, pointer } = await init();
@@ -33,6 +36,28 @@ async function main() {
     col: 0,
     hidden: true,
     allowRotation: true,
+    render() {
+      const { context, width, height } = this;
+      this.draw();
+
+      if (this.id === 'Power I') {
+        showRadius(this, 5)
+      }
+
+      // directional arrow
+      context.save();
+      context.translate(this.width / 2, this.height / 2);
+      context.rotate(this.facing);
+      context.translate(-this.width / 2, -this.height / 2);
+
+      context.fillStyle = COLORS.white;
+      context.beginPath();
+      context.moveTo(width + 5, height / 2 - 10);
+      context.lineTo(width + 15, height / 2);
+      context.lineTo(width + 5, height / 2 + 10);
+      context.fill();
+      context.restore();
+    }
   });
 
   GameLoop({
@@ -80,6 +105,7 @@ async function main() {
     cursor.image = null
     cursor.animations = null;
     cursor.buildingName = name;
+    cursor.id = name;
 
     if (!name) {
       cursor.hidden = true;
@@ -91,19 +117,20 @@ async function main() {
       cursor.image = building.image;
       cursor.width = building.image.width;
       cursor.height = building.image.height;
-      return;
     }
 
-    if (building.animations.cursor) {
+    if (building.animations?.cursor) {
       cursor.animations = building.animations;
       cursor.playAnimation('cursor');
       cursor.width = cursor.currentAnimation.width;
       cursor.height = cursor.currentAnimation.height;
     }
+
+    building.onCursor?.()
   }
 
   onInput(['1'], () => {
-    // dont rotate the belt cursor but instead show the
+    // don't rotate the belt cursor but instead show the
     // appropriate animation rotation (how?)
     setCursor('Belt I');
   });
@@ -162,14 +189,195 @@ async function main() {
 
   // window.DEBUG = true
   window.blds = [];
-  window.extractor = new Building('Extractor I', {
-    id: 1,
-    col: 6,
+  // window.extractor = new Building('Extractor I', {
+  //   id: 1,
+  //   col: 6,
+  //   row: 4,
+  //   // rotation: Math.PI*3/2
+  // });
+
+  const length = 40;
+
+
+  window.blds.push(new Building('Spawner', {
     row: 4,
-    // rotation: Math.PI*3/2
-  });
-  const length = 30;
+    col: 6
+  }));
+  window.blds.push(new Building('Arm', {
+    row: 5,
+    col: 6,
+    rotation: Math.PI/2
+  }));
+  // window.blds.push(new Building('Spawner', {
+  //   row: 8,
+  //   col: 6
+  // }));
+  // window.blds.push(new Building('Arm', {
+  //   row: 7,
+  //   col: 6,
+  //   rotation: Math.PI * 3/2
+  // }));
+  window.blds.push(new Building('Spawner', {
+    row: 4,
+    col: 5
+  }));
+  window.blds.push(new Building('Arm', {
+    row: 5,
+    col: 5,
+    rotation: Math.PI/2
+  }));
+  window.blds.push(new Building('Spawner', {
+    row: 4,
+    col: 8
+  }));
+  window.blds.push(new Building('Arm', {
+    row: 5,
+    col: 8,
+    rotation: Math.PI/2
+  }));
+  window.blds.push(new Building('Spawner', {
+    row: 4,
+    col: 7
+  }));
+  window.blds.push(new Building('Arm', {
+    row: 5,
+    col: 7,
+    rotation: Math.PI/2
+  }));
+  window.blds.push(new Building('Spawner', {
+    row: 4,
+    col: 9
+  }));
+  window.blds.push(new Building('Arm', {
+    row: 5,
+    col: 9,
+    rotation: Math.PI/2
+  }));
+  // window.blds.push(new Building('Spawner', {
+  //   row: 8,
+  //   col: 5
+  // }));
+  // window.blds.push(new Building('Arm', {
+  //   row: 7,
+  //   col: 5,
+  //   rotation: Math.PI * 3/2
+  // }));
+
+  // Belt 1 line
+  // window.blds.push(new Building('Spawner', {
+  //   row: 6,
+  //   col: 3
+  // }));
+  // window.blds.push(new Building('Arm', {
+  //   row: 6,
+  //   col: 4,
+  // }));
   for (let i = 0; i < length; i++) {
+    blds.push(new Building('Belt I', {
+      row: 6,
+      col: 5+i,
+      rotation: 0
+    }))
+  }
+  window.blds.push(new Building('Arm', {
+    row: 5,
+    col: 43,
+    rotation: Math.PI * 3/2
+  }));
+  window.blds.push(new Building('Storage', {
+    row: 4,
+    col: 43,
+  }));
+  window.blds.push(new Building('Arm', {
+    row: 5,
+    col: 44,
+    rotation: Math.PI * 3/2
+  }));
+  window.blds.push(new Building('Storage', {
+    row: 4,
+    col: 44,
+  }));
+  window.blds.push(new Building('Arm', {
+    row: 5,
+    col: 42,
+    rotation: Math.PI * 3/2
+  }));
+  window.blds.push(new Building('Storage', {
+    row: 4,
+    col: 42,
+  }));
+  window.blds.push(new Building('Arm', {
+    row: 5,
+    col: 41,
+    rotation: Math.PI * 3/2
+  }));
+  window.blds.push(new Building('Storage', {
+    row: 4,
+    col: 41,
+  }));
+
+  // Belt 2 line
+  // window.blds.push(new Building('Spawner', {
+  //   row: 7,
+  //   col: 3
+  // }));
+  // window.blds.push(new Building('Arm', {
+  //   row: 7,
+  //   col: 4,
+  // }));
+  // for (let i = 0; i < length; i++) {
+  //   blds.push(new Building('Belt II', {
+  //     row: 7,
+  //     col: 5+i,
+  //     rotation: 0
+  //   }))
+  // }
+  // window.blds.push(new Building('Arm', {
+  //   row: 7,
+  //   col: 45,
+  // }));
+  // window.blds.push(new Building('Storage', {
+  //   row: 7,
+  //   col: 46,
+  // }));
+
+
+  // // Belt 3 line
+  // window.blds.push(new Building('Spawner', {
+  //   row: 8,
+  //   col: 3
+  // }));
+  // window.blds.push(new Building('Arm', {
+  //   row: 8,
+  //   col: 4,
+  // }));
+  // for (let i = 0; i < length; i++) {
+  //   blds.push(new Building('Belt III', {
+  //     row: 8,
+  //     col: 5+i,
+  //     rotation: 0
+  //   }))
+  // }
+  // window.blds.push(new Building('Arm', {
+  //   row: 8,
+  //   col: 45,
+  // }));
+  // window.blds.push(new Building('Storage', {
+  //   row: 8,
+  //   col: 46,
+  // }));
+
+  // for (let i = 0; i < length; i++) {
+  //   blds.push(new Building('Belt I', {
+  //     row: 6,
+  //     col: 5+i,
+  //     rotation: 0
+  //   }))
+  //   blds.push(new Building('Belt II', {
+  //     row: 7,
+  //     col: 5+i,
+  //     rotation: 0
+  //   }))
     // blds.push(new Building('Belt I', {
     //   id: i,
     //   col: 5+i,
@@ -194,7 +402,7 @@ async function main() {
     //   row: 4+i,
     //   rotation: Math.PI*3/2
     // }));
-  }
+  // }
 
   window.power = new Building('Power I', {
     row: 9,

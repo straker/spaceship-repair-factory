@@ -55,6 +55,8 @@ class TakeItemBehavior extends Behavior {
 
       // make the behavior smart by not taking items that the
       // building to place into does not accept
+
+      // TODO: bug where the take behavior won't activate until there's a free slot in the building instead of taking the item when it can and just waiting to put it at the next available free slot. do i need another function that's called canAcceptItem to differentiate being able to add at the moment and having the potential to add?
       if (building.behaviors.putItem.length && toBuilding && !toBuilding.canAddItem(item)) {
         continue;
       }
