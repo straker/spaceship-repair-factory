@@ -42,6 +42,13 @@ export default class Building extends GameObject {
       inventory: []
     };
 
+    // inventorySlots=-1 is a special value that means one
+    // slot for every item and infinite stack size
+    if (props.inventorySlots === -1) {
+      properties.inventorySlots = Object.keys(items).length;
+      properties.maxStackSize = Infinity;
+    }
+
     super(properties);
 
     if (!name) return;
@@ -151,14 +158,15 @@ export default class Building extends GameObject {
   /**
    * Determine how much room the building has for the item.
    * @param {String} item - Name of the item.
+   * @param {Number} amount - Maximum amount to add.
    * @return {Number} The number of items that can be added to the building.
    */
-  getAmountCanAdd(item) {
+  getAmountCanAdd(item, amount) {
     const { inventory, inventorySlots, maxStackSize } = this;
     const max = maxStackSize || items[item].stackSize;
     let count = 0;
 
-    for (let i = 0; i < inventorySlots; i++) {
+    for (let i = 0; count <= amount && i < inventorySlots; i++) {
       const slot = inventory[i];
 
       if (!slot) {
@@ -173,7 +181,7 @@ export default class Building extends GameObject {
       count += max - slot[1];
     }
 
-    return count;
+    return Math.min(count, amount);
   }
 
   /**

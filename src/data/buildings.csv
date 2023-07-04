@@ -8,9 +8,11 @@ Belt III,,"{""inventorySlots"": 1, ""maxStackSize"": 1}",/src/assets/belt-I.png,
 Assembler I,,,/src/assets/assembler-I.png,,craftItem,
 Storage,,"{""inventorySlots"": 1}",/src/assets/storage.png,,destroyItem,"{""amount"": 10, ""rate"": 1}"
 ,,,,,,
-Arm,,"{""inventorySlots"": 1, ""maxStackSize"": 1}",/src/assets/arm.png,"{""frameWidth"": 32, ""frameHeight"": 32, ""animations"": {""0"": {""frames"": [1], ""frameRate"": 8}, ""cursor"": {""frames"": [1]}}}",takeItem,"{""amount"": 1, ""rate"": 0.75, ""animation"": {""frames"": [0,1], ""frameRate"": 8, ""loop"": false}}"
-,,,,,putItem,"{""amount"": 1, ""rate"": 0.75, ""animation"": {""frames"": [2,1], ""frameRate"": 8, ""loop"": false}}"
+Arm,,"{""inventorySlots"": 1, ""maxStackSize"": 1}",/src/assets/arm.png,"{""frameWidth"": 32, ""frameHeight"": 32, ""animations"": {""0"": {""frames"": [1], ""frameRate"": 8}, ""cursor"": {""frames"": [1]}}}",takeItem,"{""amount"": 1, ""rate"": 1, ""animation"": {""frames"": [0,1], ""frameRate"": 8, ""loop"": false}}"
+,,,,,putItem,"{""amount"": 1, ""rate"": 1, ""animation"": {""frames"": [2,1], ""frameRate"": 8, ""loop"": false}}"
 Power I,,,/src/assets/power-I.png,,generatePower,"{""radius"": 5, ""amount"": 50}"
 Furnace I,,,/src/assets/furnace-I.png,"{""frameWidth"": 64, ""frameHeight"": 64, ""animations"": {""0"": {""frames"": [0,1,2,1,2], ""frameRate"": 1}, ""cursor"": {""frames"": [1]}}}",craftItem,
 ,,,,,consumePower,"{""amount"": 50}"
 Spawner,,"{""inventorySlots"": 1}",/src/assets/storage.png,,spawnItem,"{""item"": ""Nickel Ore"", ""amount"": 1, ""rate"": 1}"
+,,,,,,
+Main Base,,"{""inventorySlots"": -1}",/src/assets/main-base.png,,craftItem,"{""inputsToInventory"": true, ""outputsToInventory"": true}"

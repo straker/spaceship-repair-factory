@@ -53,7 +53,7 @@ class PutItemBehavior extends Behavior {
         continue;
       }
 
-      const numToTake = Math.min(toBuilding.getAmountCanAdd(item), amount);
+      const numToTake = toBuilding.getAmountCanAdd(item, amount);
       const numTaken = building.removeItem(item, numToTake);
       toBuilding.addItem(item, numTaken);
 

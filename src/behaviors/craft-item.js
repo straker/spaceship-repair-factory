@@ -41,11 +41,16 @@ class CraftItemBehavior extends Behavior {
       });
     }
 
-    // add required properties to building
-    building.maxCraftStorage = options.maxCraftStorage ?? MAX_CRAFT_STORAGE;
     return super.add(building, {
       dt: 0,
       speed: 1,
+      maxCraftStorage: MAX_CRAFT_STORAGE,
+      // allows adding items to inventory if no room in inputs
+      inputsToInventory: false,
+      // allows adding crafted items to inventory if outputs are full
+      outputsToInventory: false,
+      // allows taking items from inventory as inputs to craft
+      craftFromInventory: false,
       ...options
     });
   }
@@ -56,12 +61,14 @@ class CraftItemBehavior extends Behavior {
       inputs,
       outputs,
       recipe,
-      maxCraftStorage,
-      craftFromInventory,
-      outputsToInventory,
       _removeItem,
       _addItem
     } = building;
+    const {
+      maxCraftStorage,
+      craftFromInventory,
+      outputsToInventory
+    } = building.behaviors.craftItem[0];
 
     if (!recipe) {
       return;
@@ -126,18 +133,6 @@ const craftingProperties = {
   _recipe: null,
   crafting: false,
 
-  // these settings only appear when a building has both
-  // inventorySlots and allows crafting
-
-  // allows adding items to inventory if no room in inputs
-  inputsToInventory: false,
-
-  // allows adding crafted items to inventory if outputs are full
-  outputsToInventory: false,
-
-  // allows taking items from inventory as inputs to craft
-  craftFromInventory: false,
-
   /**
    * Set a recipe to craft.
    * @param {Object} recipe
@@ -168,7 +163,8 @@ const craftingProperties = {
       return false;
     }
 
-    const { inputs, inventory, recipe, craftFromInventory } = this;
+    const { inputs, inventory, recipe } = this;
+    const { craftFromInventory } = this.behaviors.craftItem[0]
     const counts = [];
     inputs.forEach(([name, count]) => {
       counts.push([name, count]);
@@ -202,8 +198,9 @@ const craftingProperties = {
    * @return {Boolean}
    */
   canAddItem(item) {
-    const { inputs, recipe, maxCraftStorage, inputsToInventory, _canAddItem } =
+    const { inputs, recipe, _canAddItem } =
       this;
+    const { maxCraftStorage, inputsToInventory } = this.behaviors.craftItem[0];
     const canAddToInputs = !!inputs.find(([name, count], index) => {
       return name === item && count < recipe.inputs[index][1] * maxCraftStorage;
     });
@@ -219,8 +216,9 @@ const craftingProperties = {
    */
   addItem(item, amount) {
     const startAmount = amount;
-    const { inputs, recipe, maxCraftStorage, inputsToInventory, _addItem } =
+    const { inputs, recipe, _addItem } =
       this;
+    const { maxCraftStorage, inputsToInventory } = this.behaviors.craftItem[0];
     const index = inputs.findIndex(([name, count], index) => {
       return name === item && count < recipe.inputs[index][1] * maxCraftStorage;
     });
@@ -279,16 +277,16 @@ const craftingProperties = {
   /**
    * Determine how much room the building has for the item.
    * @param {String} item - Name of the item.
+   * @param {Number} amount - Maximum amount to add.
    * @return {Number} The number of items that can be added to the building.
    */
-  getAmountCanAdd(item) {
+  getAmountCanAdd(item, amount) {
     const {
       inputs,
       recipe,
-      maxCraftStorage,
-      inputsToInventory,
       _getAmountCanAdd
     } = this;
+    const { maxCraftStorage, inputsToInventory } = this.behaviors.craftItem[0];
 
     let count = inputs.reduce((total, [name, count], index) => {
       const max = recipe.inputs[index][1] * maxCraftStorage;
@@ -301,7 +299,7 @@ const craftingProperties = {
     }, 0);
 
     if (inputsToInventory) {
-      count += _getAmountCanAdd(item);
+      count += _getAmountCanAdd(item, amount);
     }
 
     return count;

@@ -269,6 +269,8 @@ const buildingPopup = {
 export default buildingPopup;
 
 function getRecipe(recipe) {
+  // TODO: if there is no recipe selected the popup ui
+  // needs some empty slots so the space is still taken up
   if (!recipe) return [];
 
   recipeName.text = recipe.name;

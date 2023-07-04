@@ -3,6 +3,8 @@ export const GRID_SIZE = 32;
 export const ITEM_SIZE = GRID_SIZE / 2;
 export const GAME_WIDTH = canvas.width;
 export const GAME_HEIGHT = canvas.height;
+export const NUM_ROWS = GAME_HEIGHT / GRID_SIZE | 0
+export const NUM_COLS = GAME_WIDTH / GRID_SIZE | 0
 
 // maximum crafting input and output storage amount (3x recipe)
 export const MAX_CRAFT_STORAGE = 3;
@@ -47,7 +49,7 @@ export let DIRS = {
 };
 
 export const TEXT_PROPS = {
-  font: `${GRID_SIZE}px Arial`,
+  font: '18px Arial',
   color: COLORS.white,
   anchor: { x: 0, y: 0.5 }
 };

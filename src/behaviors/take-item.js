@@ -61,7 +61,7 @@ class TakeItemBehavior extends Behavior {
         continue;
       }
 
-      const numToTake = Math.min(building.getAmountCanAdd(item), amount);
+      const numToTake = building.getAmountCanAdd(item, amount);
       const numTaken = fromBuilding.removeItem(item, numToTake);
       building.addItem(item, numTaken);
 

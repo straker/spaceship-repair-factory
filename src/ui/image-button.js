@@ -1,9 +1,25 @@
 import { ButtonClass } from '../libs/kontra.js';
-import { GRID_SIZE, COLORS } from '../constants.js';
+import { GRID_SIZE, COLORS, TEXT_PROPS } from '../constants.js';
+
+export const buttonSize = GRID_SIZE * 1.5;
 
 export default class ImageButton extends ButtonClass {
   constructor(properties) {
-    super(properties);
+    super({
+      ...properties,
+      width: buttonSize,
+      height: buttonSize,
+      text: {
+        ...TEXT_PROPS,
+        x: buttonSize - 4,
+        y: buttonSize - 2,
+        anchor: { x: 1, y: 1 },
+        font: '14px Arial',
+        strokeColor: COLORS.black,
+        lineWidth: 5,
+        ...properties.text
+      }
+    });
 
     if (properties.onDown) {
       this.hasDown = true;
@@ -14,7 +30,7 @@ export default class ImageButton extends ButtonClass {
 
   draw() {
     const { name, context, image, width, height } = this;
-    const end = GRID_SIZE;
+    const end = buttonSize;
 
     context.fillStyle = COLORS.black;
     context.fillRect(0, 0, end, end);
@@ -22,14 +38,14 @@ export default class ImageButton extends ButtonClass {
     if (image) {
       context.drawImage(
         image,
-        GRID_SIZE,
-        GRID_SIZE,
-        GRID_SIZE,
-        GRID_SIZE,
+        buttonSize,
+        buttonSize,
+        buttonSize,
+        buttonSize,
         0,
         0,
-        GRID_SIZE,
-        GRID_SIZE
+        buttonSize,
+        buttonSize
       );
     }
     context.lineWidth = 2;
