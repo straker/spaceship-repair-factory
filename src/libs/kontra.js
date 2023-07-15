@@ -1,3 +1,15 @@
+/*
+search: ADDED FEATURE
+
+Text
+- vertAlign to Text
+- get/set height
+- fixed height
+
+utils.addToDom
+- use :scope to only select direct children of container
+*/
+
 /**
  * @preserve
  * Kontra.js v9.0.0
@@ -20,7 +32,8 @@ function addToDom(node, canvas) {
   node.setAttribute('data-kontra', '');
   if (container) {
     let target =
-      container.querySelector('[data-kontra]:last-of-type') || canvas;
+      // ADDED FEATURE
+      container.querySelector(':scope > [data-kontra]:last-of-type') || canvas;
     container.insertBefore(node, target.nextSibling);
   } else {
     document.body.appendChild(node);
@@ -2746,6 +2759,21 @@ class Text extends GameObject {
     this._fw = value;
   }
 
+  // ADDED FEATURE
+  get height() {
+    // h = height
+    return this._h;
+  }
+
+  set height(value) {
+    // d = dirty
+    this._d = true;
+    this._h = value;
+
+    // fh = fixed height
+    this._fh = value;
+  }
+
   get text() {
     return this._t;
   }
@@ -2840,8 +2868,12 @@ class Text extends GameObject {
       this._w = this._fw || context.measureText(this.text).width;
     }
 
-    this.height =
-      this._fs + (this._s.length - 1) * this._fs * this.lineHeight;
+    // ADDED FEATURE
+    if (!this._fh) {
+      this.height =
+        this._fs + (this._s.length - 1) * this._fs * this.lineHeight;
+    }
+
     this._uw();
   }
 
@@ -2884,10 +2916,17 @@ class Text extends GameObject {
       }
       // @endif
 
+      // ADDED FEATURE
+      let alignY = this._fs * this.lineHeight * index
+      if (this.vertAlign) {
+        context.textBaseline = 'middle';
+        alignY = (this.height / 2) | 0
+      }
+
       context.fillText(
         str,
         alignX,
-        this._fs * this.lineHeight * index
+        alignY
       );
     });
   }

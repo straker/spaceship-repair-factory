@@ -1,4 +1,4 @@
-import { init as initKontra, initInput } from './libs/kontra.js';
+import { init as initKontra, initInput, load, setImagePath } from './libs/kontra.js';
 import { initConfig } from './data/config.js';
 import { initItems } from './data/items.js';
 import { initBuildings } from './data/buildings.js';
@@ -12,10 +12,15 @@ const { canvas, context } = initKontra();
 export default async function init() {
   const { pointer } = initInput();
 
+  setImagePath('/src/assets')
+
   await initConfig(); // must be loaded first
   await setLang('en');
   await initItems();
   await initBuildings();
   await initTasks();
+
+  await load('icons.png')
+
   return { canvas, context, pointer };
 }

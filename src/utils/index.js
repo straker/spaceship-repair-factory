@@ -1,6 +1,10 @@
 import { degToRad, rotatePoint } from '../libs/kontra.js';
 import { GRID_SIZE } from '../constants.js';
 
+// style used for DOM nodes needed for screen readers
+export let srOnlyStyle =
+  'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);';
+
 /**
  * Remove an item from an array.
  * @param {*[]} array - Array to remove item from.

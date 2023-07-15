@@ -1,4 +1,9 @@
 {
+  "Inventory": "Inventory",
+  "Empty": "Empty",
+  "Recipe": "Recipe",
+  "Set Recipe": "Set Recipe",
+
   "Iron Ore": "Iron Ore",
   "Nickel Ore": "Nickle Ore",
   "Iron": "Iron",

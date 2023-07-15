@@ -18,13 +18,16 @@ import ImageButton from './ui/image-button.js';
 // import buildingPopup from './ui/building-popup.js';
 import { toGrid, getDimensions } from './utils/index.js';
 import { showRadius } from './behaviors/generate-power.js';
-import Dialog from './ui/dialog.js';
+import Dialog, { renderDialogs, updateDialogs } from './ui/dialog.js';
 import BuildingDialog from './ui/building-dialog.js';
+import tooltip from './ui/tooltip.js';
+import RecipeDialog from './ui/recipe-dialog.js';
 
 // window.DEBUG = true
 
 async function main() {
   const { canvas, context, pointer } = await init();
+  window.pointer = pointer;
 
   // const imgBtn = new ImageButton({
   //   x: 100,
@@ -75,20 +78,21 @@ async function main() {
       behaviorOrder.forEach(behavior => behavior.run(dt));
       grid.update();
       _items.forEach(item => item.update());
-      window.buildingPopup?.update?.();
 
       cursor.row = toGrid(pointer.y);
       cursor.col = toGrid(pointer.x);
       cursor.x = cursor.col * GRID_SIZE;
       cursor.y = cursor.row * GRID_SIZE;
 
-      window.testGrid?.update();
+      updateDialogs();
+
+      // always last
+      tooltip.update();
     },
     render() {
       grid.render();
       _items.forEach(item => item.render());
       // imgBtn.render();
-      window.buildingPopup?.render?.();
 
       if (window.DEBUG) {
         context.strokeStyle = 'grey';
@@ -109,8 +113,10 @@ async function main() {
         cursor.render();
       }
 
-      window.buildingPopup?.render?.();
-      window.testGrid?.render();
+      renderDialogs();
+
+      // always last
+      tooltip.render();
     }
   }).start();
 
@@ -205,27 +211,31 @@ async function main() {
     row: NUM_ROWS - 5,
     col: NUM_COLS / 2 - 2
   })
+  mainBase.setRecipe(recipes.Nickel);
   // window.buildingPopup = new Dialog('Building Popup', {
   //   body: [
   //     Text({ text: 'Hello World Hello World Hello World Hello World', ...TEXT_PROPS }),
   //     Text({ text: 'Hello World', ...TEXT_PROPS })
   //   ]
   // });
-  window.buildingPopup = new BuildingDialog(mainBase);
+  window.buildingPopup = new BuildingDialog();
+  // window.recipeDialog = new RecipeDialog();
+  // recipeDialog.show(mainBase);
 
-  window.imageButton = new ImageButton({
-    // x: 100,
-    // y: 100,
-    text: {
-      font: '14px Arial',
-      text: '999'
-    }
-  });
-  window.testGrid = Grid({
-    x: 100,
-    y: 100,
-    children: imageButton
-  });
+  // window.imageButton = new ImageButton({
+  //   name: 'thing',
+  //   // x: 100,
+  //   // y: 100,
+  //   text: {
+  //     font: '14px Arial',
+  //     text: '999'
+  //   }
+  // });
+  // window.testGrid = Grid({
+  //   x: 100,
+  //   y: 100,
+  //   children: imageButton
+  // });
 
 }
 

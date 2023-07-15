@@ -78,7 +78,16 @@ class CraftItemBehavior extends Behavior {
     if (!crafting) {
       if (
         !building.hasRequiredInputs() ||
-        outputs.some((output, index) => output[1] >= recipe.outputs[index][1] * maxCraftStorage)
+        outputs.some((output, index) => {
+          return (
+            output[1] >= recipe.outputs[index][1] * maxCraftStorage &&
+            (
+              outputsToInventory
+                ? !building._canAddItem(outputs[index][0])
+                : true
+            )
+          )
+        })
       ) {
         return;
       }

@@ -67,12 +67,7 @@ export async function initItems() {
       });
     });
 
-  createRecipe('none', {
-    enabled: true,
-    time: Infinity,
-    inputs: [],
-    outputs: []
-  });
+  createRecipe('none');
 
   // load mods
   config.mods.forEach(mod => {
@@ -132,12 +127,22 @@ function createItem(name, props) {
  * @param {Object} props - Properties of the recipe.
  * @param {Boolean} props.enabled - If the recipe should start enabled.
  * @param {Number} time - Time in seconds to craft the recipe.
+ * @param {String[]} craftedBy - List of buildings which can craft the recipe
  * @param {(String|Number)[][]} inputs - Required inputs to craft the recipe, in the format of Array<[ItemName, Quantity]>.
  * @param {(String|Number)[][]} output - Items produced when crafted, in the format of Array<[ItemName, Quantity]>.
  * @param {String} [props.mod] - Name of the mod creating the recipe.
  * @param {...*} props.* - Any other properties
  */
 function createRecipe(name, props) {
+  props = {
+    enabled: true,
+    time: Infinity,
+    inputs: [],
+    outputs: [],
+    craftedBy: [],
+    ...props
+  };
+
   if (recipes[name]) {
     recipes[name] = addModChanges(recipes[name], props);
   } else {
